@@ -1,0 +1,2073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RentalBHK — Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1769FF; --blue-dark:#0F52D6; --navy:#0B1736; --bg:#F5F8FF;
+    --card:#FFFFFF; --line:#DDE6FA; --muted:#5C6B8A; --green:#1E9E6B; --amber:#C77D12; --red:#D64545;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Inter',sans-serif;background:var(--bg);color:var(--navy);}
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;}
+  button{font-family:inherit;cursor:pointer;}
+  select,input,textarea{font-family:inherit;}
+
+  .topbar{background:var(--navy);color:#fff;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:9px;}
+  .brand-mark{width:32px;height:32px;border-radius:9px;object-fit:cover;flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,.15);}
+  .brand-text h1{font-size:16px;margin:0;font-weight:700;}
+  .brand-text span{font-size:10.5px;color:#AFC1F5;}
+  .top-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .mini-select{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:7px 8px;font-size:11.5px;}
+  .mini-select option{color:#111;}
+  .icon-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;width:32px;height:32px;border-radius:8px;font-size:14px;display:flex;align-items:center;justify-content:center;}
+  .login-btn{background:var(--blue);color:#fff;border:none;padding:8px 14px;border-radius:9px;font-size:12px;font-weight:600;white-space:nowrap;}
+
+  .role-switch{display:flex;background:rgba(255,255,255,.08);border-radius:10px;padding:4px;gap:2px;overflow-x:auto;}
+  .role-switch button{background:transparent;border:none;color:#C7D3F2;padding:8px 12px;border-radius:7px;font-size:12.5px;font-weight:500;white-space:nowrap;}
+  .role-switch button.active{background:var(--blue);color:#fff;}
+  .topbar-row2{padding:0 18px 12px;}
+
+  main{max-width:1180px;margin:0 auto;padding:22px 18px 60px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;margin:28px 0 14px;gap:10px;flex-wrap:wrap;}
+  .section-head h2{font-size:19px;margin:0;}
+  .section-head .hint{font-size:12.5px;color:var(--muted);}
+
+  .search-row{display:flex;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;flex-wrap:wrap;}
+  .search-row input[type=text]{flex:1;min-width:150px;border:none;font-size:14px;outline:none;padding:6px 4px;background:transparent;}
+  .search-row button{background:var(--blue);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;}
+
+  .cust-layout{display:grid;grid-template-columns:230px 1fr;gap:20px;margin-top:18px;}
+  @media(max-width:760px){.cust-layout{grid-template-columns:1fr;} .filters{position:static;top:auto;}}
+
+  /* ---- Mobile view tuning ---- */
+  @media(max-width:480px){
+    .topbar{padding:10px 12px;}
+    .brand-text h1{font-size:14.5px;}
+    .brand-text span{display:none;}
+    main{padding:14px 12px 50px;}
+    .section-head h2{font-size:16.5px;}
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .prop-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+    .prop-img{height:105px;}
+    .form-grid{grid-template-columns:1fr;}
+    .doc-grid{grid-template-columns:1fr;}
+    .modal-box{padding:18px 16px;}
+    .owner-table{display:block;overflow-x:auto;white-space:nowrap;}
+    .owner-table th,.owner-table td{white-space:nowrap;}
+    .detail-actions{flex-direction:column;}
+    .detail-actions button{width:100%;}
+    .admin-tabs button{font-size:12px;margin-right:10px;}
+    .role-switch button{padding:7px 9px;font-size:11.5px;}
+    .top-right{gap:6px;}
+    .mini-select{padding:6px 5px;font-size:10.5px;}
+    .icon-btn{width:28px;height:28px;font-size:12px;}
+    .login-btn{padding:7px 10px;font-size:11px;}
+  }
+
+  .filters{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;align-self:start;position:sticky;top:12px;}
+  .filters h3{font-size:13px;margin:0 0 12px;color:var(--muted);}
+  .f-group{margin-bottom:16px;}
+  .f-group label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px;}
+  .f-group select,.f-group input[type=range],.f-group input[type=text]{width:100%;padding:7px 8px;border:1px solid var(--line);border-radius:7px;font-size:13px;background:#fff;color:var(--navy);}
+  .chip-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 11px;font-size:12px;color:var(--muted);}
+  .chip.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+
+  .prop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px;}
+  .prop-card{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;}
+  .prop-card:hover{border-color:var(--blue);}
+  .prop-img{height:130px;position:relative;display:flex;align-items:flex-end;padding:8px;}
+  .prop-img .badge{background:rgba(255,255,255,.92);color:var(--navy);font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;}
+  .prop-img .verified{position:absolute;top:8px;left:8px;background:var(--green);color:#fff;font-size:10.5px;font-weight:600;padding:3px 7px;border-radius:6px;}
+  .prop-img .heart{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .prop-body{padding:12px 14px 14px;}
+  .prop-rent{font-size:17px;font-weight:700;font-family:'Space Grotesk';}
+  .prop-rent span{font-size:12px;color:var(--muted);font-weight:400;font-family:'Inter';}
+  .prop-loc{font-size:12.5px;color:var(--muted);margin-top:2px;}
+  .prop-tags{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;}
+  .tag{font-size:10.5px;background:var(--bg);border:1px solid var(--line);padding:3px 7px;border-radius:6px;}
+
+  /* ---- Ads (local services) ---- */
+  .ad-card{background:linear-gradient(135deg,#FFF7E8,#FFF1D6);border:1.5px dashed #E8C87A;border-radius:14px;overflow:hidden;cursor:pointer;position:relative;}
+  .ad-card .ad-ribbon{position:absolute;top:8px;right:8px;background:var(--amber);color:#fff;font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:6px;letter-spacing:.3px;}
+  .ad-card .ad-icon{height:80px;display:flex;align-items:center;justify-content:center;font-size:32px;}
+  .ad-card .ad-body{padding:10px 12px 12px;}
+  .ad-card .ad-cat{font-size:11px;font-weight:700;color:#8A5B00;}
+  .ad-card .ad-name{font-size:13px;font-weight:700;font-family:'Space Grotesk';margin-top:2px;}
+  .ad-card .ad-tag{font-size:11px;color:var(--muted);margin-top:2px;}
+  .ad-card button{margin-top:8px;width:100%;background:var(--amber);color:#fff;border:none;padding:7px;border-radius:7px;font-size:11.5px;font-weight:600;}
+  .ad-banner{background:linear-gradient(135deg,#FFF7E8,#FFEBC2);border:1px solid #E8C87A;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:14px;overflow-x:auto;}
+  .ad-banner .ad-chip{flex-shrink:0;background:#fff;border:1px solid #E8C87A;border-radius:9px;padding:7px 11px;font-size:11.5px;font-weight:600;color:#8A5B00;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+
+  .detail-panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:14px;margin-top:18px;padding:20px;}
+  .detail-panel.open{display:block;}
+  .detail-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+  .close-detail{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:12px;}
+  .view360{margin-top:14px;height:180px;border-radius:12px;background:repeating-linear-gradient(45deg,#E4ECFF,#E4ECFF 10px,#DCE6FF 10px,#DCE6FF 20px);display:flex;align-items:center;justify-content:center;color:var(--blue-dark);font-size:13px;font-weight:600;}
+  .amen-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:14px;}
+  .amen{background:var(--bg);border-radius:9px;padding:9px;font-size:12px;text-align:center;}
+  .detail-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+  .btn-primary{background:var(--blue);color:#fff;border:none;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;}
+  .btn-ghost{background:#fff;color:var(--navy);border:1px solid var(--line);padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;}
+  .review-row{display:flex;justify-content:space-between;padding:9px 0;border-top:1px solid var(--line);font-size:13px;}
+  .stars{color:var(--amber);}
+
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+  .stat-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;}
+  .stat-card .num{font-size:22px;font-weight:700;font-family:'Space Grotesk';}
+  .stat-card .lbl{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .owner-table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:12.5px;}
+  .owner-table th{text-align:left;background:var(--bg);padding:10px 12px;font-size:11px;color:var(--muted);font-weight:600;}
+  .owner-table td{padding:11px 12px;border-top:1px solid var(--line);}
+  .row-actions button{background:none;border:none;color:var(--blue);font-size:12px;font-weight:600;margin-right:8px;padding:0;}
+  .row-actions button.danger{color:var(--red);}
+
+  .add-form{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-top:16px;}
+  .add-form h4{margin:18px 0 8px;font-size:13px;}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;}
+  .form-grid label{display:block;font-size:12px;font-weight:600;margin-bottom:5px;}
+  .form-grid input,.form-grid select{width:100%;padding:8px;border:1px solid var(--line);border-radius:7px;font-size:13px;background:#fff;}
+  .upload-box{margin-top:10px;border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;color:var(--muted);font-size:12px;}
+  .doc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:8px;}
+  .doc-grid .upload-box{margin-top:0;}
+  .loc-box{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;}
+  .loc-status{font-size:12px;color:var(--muted);}
+
+  .admin-tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:16px;overflow-x:auto;}
+  .admin-tabs button{background:none;border:none;padding:10px 4px;font-size:13px;color:var(--muted);font-weight:600;border-bottom:2px solid transparent;margin-right:14px;white-space:nowrap;}
+  .admin-tabs button.active{color:var(--navy);border-color:var(--blue);}
+  .admin-pane{display:none;}
+  .admin-pane.active{display:block;}
+
+  .verify-item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 16px;margin-bottom:10px;gap:12px;flex-wrap:wrap;}
+  .verify-left{display:flex;gap:12px;align-items:center;}
+  .doc-thumb{width:42px;height:42px;border-radius:9px;background:linear-gradient(135deg,#DCE6FF,#B8CCFF);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .verify-name{font-size:13px;font-weight:600;}
+  .verify-sub{font-size:11.5px;color:var(--muted);}
+  .verify-actions button{border:none;padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:600;margin-left:6px;}
+  .approve{background:#E4F7EE;color:var(--green);}
+  .reject{background:#FCE9E9;color:var(--red);}
+  .video-btn{background:var(--bg);color:var(--navy);border:1px solid var(--line);padding:7px 12px;border-radius:7px;font-size:11.5px;font-weight:600;}
+
+  .district-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:8px;}
+  .district-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;}
+  .district-card .num{font-size:20px;font-weight:700;font-family:'Space Grotesk';color:var(--blue);}
+  .complaint{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:10px;font-size:13px;}
+  .complaint .meta{font-size:11.5px;color:var(--muted);margin-top:3px;}
+  .empty{padding:30px 10px;text-align:center;color:var(--muted);font-size:13px;}
+
+  .super-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px;align-items:start;}
+  @media(max-width:820px){.super-grid{grid-template-columns:1fr;}}
+  .admin-list-item,.flagged-item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 15px;margin-bottom:9px;}
+  .admin-list-item .name,.flagged-item .name{font-size:13px;font-weight:600;}
+  .admin-list-item .sub,.flagged-item .sub{font-size:11.5px;color:var(--muted);}
+  .admin-list-item .remove,.flagged-item .block-btn{background:#FCE9E9;color:var(--red);border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;}
+  .create-admin{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;}
+  .rev-bars{display:flex;align-items:flex-end;gap:10px;height:140px;margin:14px 0 6px;padding:0 4px;}
+  .rev-bar{flex:1;background:linear-gradient(180deg,#5B9BFF,var(--blue));border-radius:6px 6px 2px 2px;position:relative;}
+  .rev-bar span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:10.5px;color:var(--muted);font-weight:600;}
+  .rev-months{display:flex;gap:10px;padding:0 4px;}
+  .rev-months div{flex:1;text-align:center;font-size:10.5px;color:var(--muted);}
+  .toggle-row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-top:1px solid var(--line);}
+  .toggle-row:first-child{border-top:none;}
+  .toggle-row .t-label{font-size:13px;font-weight:600;}
+  .toggle-row .t-sub{font-size:11.5px;color:var(--muted);margin-top:1px;}
+  .switch{width:38px;height:22px;border-radius:20px;background:var(--line);position:relative;cursor:pointer;flex-shrink:0;}
+  .switch::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.15s;}
+  .switch.on{background:var(--blue);}
+  .switch.on::after{left:18px;}
+  .broadcast-box textarea{width:100%;min-height:80px;border:1px solid var(--line);border-radius:9px;padding:10px;font-size:13px;resize:vertical;}
+
+  .login-btn.is-in{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);}
+
+  .type-toggle{display:flex;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:3px;}
+  .type-toggle button{flex:1;background:transparent;border:none;padding:8px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--muted);}
+  .type-toggle button.on{background:var(--blue);color:#fff;}
+  .cat-chip{display:flex;flex-direction:column;align-items:center;gap:4px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 4px;font-size:10.5px;color:var(--muted);text-align:center;line-height:1.2;}
+  .cat-chip.on{border-color:var(--blue);background:#EAF1FF;color:var(--blue-dark);font-weight:600;}
+  .cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
+  .cat-chip .ic{font-size:16px;}
+
+  .blur-locked{filter:blur(5px);user-select:none;pointer-events:none;}
+  .lock-overlay{position:relative;}
+  .lock-cta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:rgba(255,255,255,.6);border-radius:10px;text-align:center;padding:8px;}
+  .lock-cta .lock-btn{background:var(--blue);color:#fff;border:none;padding:7px 14px;border-radius:7px;font-size:11.5px;font-weight:600;}
+  .lock-cta span{font-size:10.5px;font-weight:600;}
+
+  .stepper{display:flex;align-items:center;margin:14px 0;}
+  .step{display:flex;flex-direction:column;align-items:center;flex:1;text-align:center;position:relative;}
+  .step .dot{width:26px;height:26px;border-radius:50%;background:var(--line);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;z-index:1;}
+  .step.done .dot{background:var(--green);color:#fff;}
+  .step.active .dot{background:var(--blue);color:#fff;}
+  .step .lbl{font-size:10px;color:var(--muted);margin-top:6px;max-width:80px;}
+  .step:not(:last-child)::after{content:'';position:absolute;top:13px;left:50%;width:100%;height:2px;background:var(--line);z-index:0;}
+  .step.done:not(:last-child)::after{background:var(--green);}
+  .ai-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:#EAF1FF;color:var(--blue-dark);}
+  .stage-pill{font-size:10.5px;padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap;}
+  .stage-ai{background:#EAF1FF;color:var(--blue-dark);}
+  .stage-admin{background:#FFF3DE;color:var(--amber);}
+  .stage-super{background:#F1E9FF;color:#7B3FE4;}
+  .stage-live{background:#E4F7EE;color:var(--green);}
+  .stage-rejected{background:#FCE9E9;color:var(--red);}
+
+  /* Login modal */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(11,23,54,.55);z-index:50;align-items:center;justify-content:center;padding:16px;}
+  .modal-bg.open{display:flex;}
+  .modal-box{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:360px;}
+  .modal-box h3{margin:0 0 4px;font-size:18px;}
+  .modal-box .sub{font-size:12.5px;color:var(--muted);margin-bottom:16px;}
+  .modal-box input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:14px;margin-bottom:10px;}
+  .modal-box .btn-primary{width:100%;padding:11px;}
+  .modal-close{float:right;background:none;border:none;font-size:16px;color:var(--muted);}
+  .role-pick{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .role-pick .rp{border:1px solid var(--line);border-radius:10px;padding:10px 4px;text-align:center;font-size:11px;font-weight:600;background:#fff;}
+  .role-pick .rp.on{border-color:var(--blue);background:#EAF1FF;color:var(--blue-dark);}
+  .profile-menu{position:relative;}
+  .profile-dropdown{display:none;position:absolute;top:38px;right:0;background:#fff;color:var(--navy);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(11,23,54,.18);min-width:190px;overflow:hidden;z-index:40;}
+  .profile-dropdown.open{display:block;}
+  .profile-dropdown button{width:100%;text-align:left;background:none;border:none;padding:10px 14px;font-size:12.5px;border-bottom:1px solid var(--line);}
+  .profile-dropdown button:last-child{border-bottom:none;color:var(--red);}
+
+  .fb-item{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px;}
+  .fb-item .fb-q{font-size:13px;}
+  .fb-item .fb-reply{margin-top:8px;background:var(--bg);border-radius:8px;padding:9px 11px;font-size:12px;}
+  .fb-item .fb-reply b{color:var(--blue-dark);}
+  .star-pick{display:flex;gap:6px;font-size:22px;margin-bottom:10px;cursor:pointer;}
+  .star-pick span{color:var(--line);}
+  .star-pick span.on{color:var(--amber);}
+
+  /* ---- Document viewer modal ---- */
+  .manual-tag{font-size:11px;font-weight:600;color:var(--green);margin-top:4px;display:none;}
+  .doc-modal-box{max-width:480px;text-align:left;max-height:85vh;overflow-y:auto;}
+  .doc-thumb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin:14px 0;}
+  .doc-thumb-lg{border:1.5px solid var(--line);border-radius:10px;padding:10px 4px;text-align:center;font-size:10.5px;color:var(--muted);background:#fff;}
+  .doc-thumb-lg.sel{border-color:var(--blue);background:#EAF1FF;color:var(--blue-dark);font-weight:600;}
+  .doc-thumb-lg .ic{font-size:22px;display:block;margin-bottom:4px;}
+  .doc-preview{margin-top:6px;height:150px;border-radius:10px;background:repeating-linear-gradient(135deg,#EEF3FF,#EEF3FF 8px,#E2EBFF 8px,#E2EBFF 16px);display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--blue-dark);font-size:13px;font-weight:600;gap:4px;}
+  .doc-preview span{font-size:11px;color:var(--muted);font-weight:400;}
+  .field-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12px;}
+  .field-table th{text-align:left;background:var(--bg);padding:7px 9px;font-size:10.5px;color:var(--muted);}
+  .field-table td{padding:7px 9px;border-top:1px solid var(--line);}
+  .field-table .ok{color:var(--green);font-weight:700;}
+  .field-table .bad{color:var(--red);font-weight:700;}
+  .doc-modal-actions{display:flex;gap:10px;margin-top:16px;}
+
+  /* ---- Photo/Video gallery ---- */
+  .photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;}
+  .photo-tile{height:72px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;color:rgba(255,255,255,.85);}
+  .video-tile{margin-top:8px;height:120px;border-radius:10px;background:linear-gradient(135deg,#0B1736,#1F3B7A);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;cursor:pointer;}
+  .video-tile .play{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .video-tile span{font-size:11.5px;color:#C7D3F2;}
+
+  /* ---- Chat modal ---- */
+  .chat-modal-box{max-width:380px;text-align:left;}
+  .chat-messages{max-height:260px;overflow-y:auto;margin:12px 0;display:flex;flex-direction:column;gap:8px;padding-right:2px;}
+  .chat-bubble{max-width:80%;padding:8px 12px;border-radius:14px;font-size:13px;line-height:1.4;}
+  .chat-bubble.them{background:var(--bg);color:var(--navy);align-self:flex-start;border-bottom-left-radius:4px;}
+  .chat-bubble.me{background:var(--blue);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;}
+  .chat-input-row{display:flex;gap:8px;}
+  .chat-input-row input{flex:1;padding:10px;border:1px solid var(--line);border-radius:20px;font-size:13px;}
+  .chat-input-row button{background:var(--blue);color:#fff;border:none;padding:10px 16px;border-radius:20px;font-size:12.5px;font-weight:600;}
+
+  /* ---- Rental Agreement modal ---- */
+  .agreement-modal-box{max-width:560px;text-align:left;max-height:88vh;overflow-y:auto;}
+  .agree-doc{background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:18px;margin-top:12px;font-size:12.5px;line-height:1.7;}
+  .agree-doc h4{margin:0 0 10px;font-size:14px;text-align:center;font-family:'Space Grotesk';}
+  .agree-doc .row{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding:5px 0;}
+  .agree-doc .row b{font-weight:600;}
+  .agree-doc .clause{margin-top:10px;font-size:11.5px;color:var(--muted);}
+  .agree-doc .sig-row{display:flex;justify-content:space-between;margin-top:16px;font-size:11.5px;}
+  .agree-doc .sig-row div{text-align:center;flex:1;}
+  .agree-doc .sig-line{border-top:1px solid var(--navy);margin-top:22px;padding-top:4px;}
+  .agree-pay-row{display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:10px;padding:10px 12px;margin-top:8px;}
+  .agree-pay-row .who{font-size:12.5px;font-weight:600;}
+  .agree-pay-row .status-paid{color:var(--green);font-size:11.5px;font-weight:700;}
+  .agree-pay-row .status-pending{color:var(--amber);font-size:11.5px;font-weight:700;}
+  .agree-pay-row button{background:var(--blue);color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:11.5px;font-weight:600;}
+  .agree-success{background:#E4F7EE;border:1px solid #BFE8D2;border-radius:12px;padding:14px;margin-top:12px;}
+  .agree-success .title{color:var(--green);font-weight:700;font-size:13.5px;margin-bottom:4px;}
+  .agree-success .line{font-size:12px;color:var(--navy);margin-top:3px;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <img class="brand-mark" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAKAAAACgCAIAAAAErfB6AABAhUlEQVR42q29eZxdVZku/D5r7X1OzVVJSCUkQCBAgAQCDigKtK1xQL0ITSM4i7azdtsOKKBCgG4H/L7WtqUH9HrxXlscW0AvIE5tO9Myh5lAAgkJGSqVms6013q/P/YZ1rj3CX7146eVU+fss/da73qH53kH0Pn/RfkPiIiIKfCDzuv5LzD+xN5f/Y/k/2D74wwCtV/3vx2dz/tXJvsGui8x9z6VX5+YYPySv8e6iHFj9s31nq77bnDveYveDAJ1bsZ5QPT+SaFlNB/VWXDr8fOHdT5I7j2DiElYf/Dfbf4bzisgps5jODuaL6vxfdx9v3krbG0tezcakzbzDdz5vCkuRL396G0AE0DornVneRCUIPQeB+Z6w3oqtjcMndtC968wnpF7ywJvP9ofZevBObiLEdHvrQa6kiGo5IfdBe2tLLfPRPAQg3vP3N5ItuXLPGr+13JAfzi3AQocIHRvzxNWc2vAnS1k98P5V5s3wMbqE/eu74sj+4eSe7fUXhD0nshReIjpp9CVYZ+Z9ovsSKAIXAjFJ4mNU8vhs9XPLbafCr2LICpjgb/Gznf3RDrWhL2bZ+O67Og7Dp+wgh8Yh5gReL33pexoivbJQ0gRwvvFfZygZPdUo3BvAoWPBO9Y5yJpHWKEBcW5S0ZnM4znDL7Tlzx4p4Htg9DdYzKMiKPfYB/PnvJE26DkvwO9+4G3Mbay7/zCtmwZajNwBuDaPgRVFwI6g2ybCFgCwURESUARBd2roMHvqjvzouCI5XBe4bAQ+OcGIc1sbg8MiW7bWn8LS900tnwiMkw4KGAFKHLEA+eEyXfL4PzVs3SuAucS7WhKFZtOVuzowFeP6Ei39zbzHxw//ejvgLoaz3ts1+ChL4vlHGgOPmNHK5DhW7F9D1zwaIjKEIfUaUAyDJ1kPj4KrRgM3WMfA2FYbNdDtFRW1y3sqhT2fSIObFKxuue48vDXKyiIHPpexJVQz/b7htD279j0t03tbX+wu6xsu/GOq4yyJ/Jlk71HdsUiEiEZGyTiAZJ9BNjw0zhkOUJBmGU5OO6fm6eHDD+F2YqbCyyQ+zrCvjd3QyMu0rFs7y48PenE384xorg/ATsKhxeemOGZ71T6PmOBmqSuiiYqedreZsDSXTHtCjtIQPxoukeNw+ejdylEghMEIsWw1jViTcs7M/6D7Vo7kRTs1eneZ/irg6rONumwZQihAA9+KBUyiN5xEgHJQlRNWgeHDdNiyp0V2jtiEdIOwYAHHAjq2Vs+E15g6u1NOPgNiW93y8Fe1Meu8idTnror0Fl7RuBBHLcUiOpkjgEgCJ+HoBsL9x4S1z1GCB/xr8UchjbZ+z43kLc3B3FfmkMRRTd49Z3GMKDKPajS1L0cE2K2nBJfmyGyGV3j0gNNyXKPC7yS4NbC0wAcO2whw9dZ6iSq8WPARfdhTKDRNagdsDR/1N477d9NjNf12uCdHlOK2fCS2N4bDyUCWxEnd8+6YTsZPdvs3zAM9KArJmyiPbCiMlAIlI/bNdiHzHKmghwAu0tHsLAzQ4iF60OSoWN78g5XLVMobjHNM9DeA2Yv5qMeTOhjub7EdJWzSxWQTRXE/CBP8cAzV7BBaRjP63qLxuLCFGvz9gyoxDHdHDRhXhQOT6+4hzBkOUJQlwgDVT3T4rhahtiimAMwATPYAX6ZSQ66xD1J7zrYIVAANlXg6iQY4Axcdog7caBLZznKGQaYA8uRdt5sMWMdGQJ7XjHcJ/WNFGBvjR2SsQ2kG28WAZge9mJzaPWZAshhTzzZiG1Ajlkz8Vg/8kYooCKKhltg+4PGcxJc3N8xAWw4Wab/7OBZpmRb22aHWz02ybgIm3Emh+Mxsj0A9v0VWGE6TCAdtq8Di0Ajhy7sYuVdVLNHB8GKB5z9gx2NWCirYRCcWCUGzwRPeZeZAFtPxU4MyiGwFx7ezRahae5fD/pHGDVsb0PnuHME7nYOoyPKJsQdU4SW9LAVfLomwzcQ/gb3LIRJisEVf9NswIDUmF0INwigsL+mHOCPwQGQBCG2vAc9GvAmnOVkI45y1I/pN9heErOBeXFvNdiUGzaEGAHsyWcGHdvM3eyAOFXM7IKdFIOTO6LQuV5ShOOwvaY9wAEBar2bZoBC79EJSCzD35ESjss1HB8UUYeLQp5/0F0g+wZMjUVGcIwYyWCTjGbIHtYo7J7saBYNPPeqaxSMi3e3A3A1CHygw/dC0TkT8EJb2PddCq6SB0kCfcBnFCIiHIjEuEPmMO5vOrrMtntvx6/wARbyPKnIcQsAaggx1qHndZUWe9gnBwDuXlDHPYGASfjHSGYykkjMy7F9xMJKg72d49DWc0/jBSOcXvYIWc9TgM6ZTirHUQVQKCmHXViRYUVWTL1gmg2CsggT5hIAueeWcyjrjUtOIMXXAyYWDScxwPCzTK8SnoCjmMqNOxKAd6Cdt5ieHQISzKGQAiE+oyfasE6hyYTmsTt5Ji2IjQNFZLZP1DNFYFRbU0ZTHozUAw7Gx2E4U4QhSdggu7vNXVlGgOTxGWLLZBpGnr34zP24J/uwvx1lxDD5dAKHmJ+OwnfDHs9vMtMlgzB798bIjVhCWSkOS8Yhvx2Bo48QhhOCeIVHfSPgvvbyFx0ZZzeVzoqOIuymeXrY8KLZVo8mdg+byAYs1xf2d4RxZu7xSM4NwReFYAoHQj5W8OvYgutRGPU64T97ZDmxgbD6gE8cIWAzTOLQqvk5G7ASunpoF+yt5RA5CBPOJQPZsZ17IpdE8+k29jcjmEphrEKP2vOz2XyVA/cQW3wlB3izIiYUPQLKyeZEKAPcUjPoJa/BeGoOpoJ4OpwhLMqsAM6Fizh3InHuMWjd30Ehby2CxTOFXbZgKrULlLIns7D3nr1YudhHMx6zCwkAduYsWTRDJOHRs69M0WwPz12wqAsfUnSYTcfwwUxeFpGsA7ggMHtnAqA4kV+WnmnKKazUJ4f/R8Qv4xDvCifqYDfAQNDvRgQeZxdbhr04JQECRVWn46UGsTwXJUJP9/TwSLgQLNkqloKJ72yTG4HcPi/BA34gyHFqN0TJdm0EgmR7OCEx5GVwKH8vuJqxrDvT3ARTKzj08SBM4dHYBf6Br+EBOzjsgjBsuy8UhmCt0hX2WXpfroPJeQUcFjwi0M3Dj8daCITCTK4bXESvBu/O8vTcvBFfc8JBNrhIcH0WxEkT6JZIlYax5pMSh/F5P6Qkk/9ov1kEgssumG6eVDiqv598Dg5tAhclNAQBbMRS2MlibcOBWUgKQKFMdvKSWkLCxCE5Zo5RtIZcOpomeBjgKcuI9xcJlVzGjM3KBrKfESHwhWEQKZGyomgoCjtHmcNnEWRj3bASx5mjyI0fhAQ8ICeuCEokByyxlePArqkEom4G+nFHKJo53K0Bs8I8WNiir064lwKQhGCzjio3ad0As4eyu/eY4NK0aRhclkPhAS4GwsECkFBqi5Pb7H5dgfoJZZEWuUOhTzm3HdXS9krC1u3WZ9nN8vHtdyd7SYTcUds+semvk51yTxTJMbF1shOBsGduPTrWSbFwwwwbhQfFcxJjZZrkugLhIi+vXIzIQHs44m2QXwPp3b9PXXAEXA9WRBnLyyE10JGqxCCbIrtjvYFDB5QLahOMZfJFMqQVevGl6Ys6ZdpeGqibSRmj5wqw+WBBBIermECRMpDCQxllQtl1EjnoAHLceaSYHIuwciothgk8QEHdjMcZFFzdofxAoSJ82BqM3NAFfr0tCujliMNS+uCxryh+utJNKq4yKSCmAkS4cLNJTIA7UG+DnoNNwbASZSvChR9hz1JyYF2Y4jLIIUEuACUcc8NlZawU0WFwU1NiAW7RcY/cdUFAWoCoBCr82dZCCBFwvRQ7DnF2xcXFDq0Kl1MrumO24xwKVcmjGA0K8h6RcKVMWB0D2UvH5EAUV3YwS3QGguEZRZFwdtgkspNbEYrbYFDTFm5lBgkI7ZDzX2S5EYxZizLSQo8YiPBitTH2qUW0UIDigZl54hGEtcl2O7isANRg8xAhqYoicv9AdvlgJrv7RIjsZNuHhO/qcLnmCTQcsCXd9V9iVXZOsp+zYRTpfsCF9hil9aze54LC3Sc8ENdVKP/iaHGNBVpAuO0Q3DQrP7fUT5WyPRrEvBiUuGbmBznIoHKJC+NlG3lHDSGoK1h5znFFjZA+5yKsLax7KN4XInhSUeheILCetg3msDF2gVyErHxM9tnrpFUQ1RkqAbHVhxtPox+nl6KpesVAUnjtgobARJKLwxIudDI82QUVegxcqBVYlKxG1CxxCF5GHxfi+BcgZBqD3hkVoiuxPxWkZiIiphwCNAr6ByCQNBnIWypeZe5DUsvQN/LpQj+5CaVVw/6KxFieAlgAoW4UZqjH8YCPI2yVD2L0AfGHn9SvtOQQikfxYmcu9NpQFpHDNhYc8flt0In9DQ5kerKFXIfDzSBT4beS4FD4gZCBtCtTohBELNOJI0cktsdBs0KRoxbuQNMnSBG681jnolLgk0KahjzIHaJQMfh5mn03WUHpfXDo/DmbFIQdELJtHDKNHD+RPmmPSCMMxOWb4u5SwenkODZeKnlcBiU5m8VJAFkya+5AhUFO4Q1xQTuqUsyG+4YCOFgAFDmO/S9r99ocDkKKlHAZCejcPHM5Ntn/bZuFPOQ0YSk1BwcAvPXXRqnoIug7oOT+ok/EI7fIO1HgrHHc8/BzCBFOjC2KaJ9pLM3B2qTisBIU9/v7+dpgo7JSloLjzenQt5QUhOAczyrm/ow0RVAw9uAIjhQvUbSi5xn8mFVkhpOFCHqCMmzZF9KYa8pFmEa/D9OPJkchfNZ/uFyMcfaj4kpRSY56y8XZUFy6Sm5WJUcANnYRc/c7nBSnYsODeISKOKzTv5uKMsqoDwQ4kIJSrFe40DmneOBA5R150Z/ohk9ab5FFv/E1/MQ+RCT6QDmTmFvLcdUXrN7k/jhEFBpgRKCu/sFkFDp0QSIL8R6Ydvpt8c7Dt0HFNphDdovJYws4HuMHETWUOQkIcX/+TgczrWJ9jDm+jrE4tfQQIRIZc8gXKwAxOMKCdHOnCjhmDrl1bJxgRqA1YYEqQ/8bhrIWs9RfA9qCM8d29RHsnLSCfD8ug6tiGLIvK6WmAZFkXkQwjWJVV9aB2S0fBRd6ZdQHjc8hJAQR/91uTgdGFI4u8PUiJt8tYqByKL8vI40QVF4M6sVgtQKdHANTUZigQsXXF2XG1wZCuTjvy2nwwYVeLksB1sQEAHF8vxQAivQacLNw0EegVWBZCuQDfQcCQVqay/z2YocRUUvPbRVNkZYRtvPCPjeHCKBf4H303iClUAvZcApozZkWIpYrE+ubz5EAAkZLf5+j5LKPx7zlmAsdpFKKmY/OUoCDWQMCSCQSiUQAYSvA/aFmTAQROe5wiTD0Aywg7FLCoTsoSaCmG6957uIHv/DcX122fvlwohtKSp9wtVVclE4nKYWUQkpICSlJCkoSSqSQQgAFRrHU+QeVDB7wEfWCXCLbsWAEmGNAt3Q2k2UzWTaXsaZIR/OYVLntodAejIVCp9KVRYQsNwq73nclB1JQNt18+8tXfOUDx+QHd9PWuZdvvGfHTCYHpVI6qt9AgZL4/M5qmQsAaSJiEqCqlBWhVIEN4zL8IZYNbvMwICnaS6w0M8eGMEQXSgC6pdceMvSco0YyTWD+0R37ZmoKAvzMsC2iJFxNGRMRQqTRPPXaKMNsS8pWwTQgQNl082PnrvrcBUdqzZnSmun4VSM/vWL9GRvveXK6JQcTpXTYUWfXlALEmocq4p/fccySkUQpziGZesZTc629+1v3PDn/6wdndu5u0HASbnYRyKfpp4QuZPMzzmpZ+wKDkhJ47b995spaZSFI19WrT1x01QVH5p857m9um5nLIMH9w332cU2ifl8YM/D64VsiDM6YzRpiABL5KwJgIjXb+uzbjvz4X67KFAuQAKSgVqbXHjrysytOevnGu7fsbSZDMlNcGFOZ1aecgM89denwQBJ85KmZ1r/esv3S727lRNpKEXGfOZZMGCzYIQHSDbV21fBFZx3a0jqV4ks3PfXHR2bEgNSay6JKN0CvNVWmuZVpwaycrjRh3gm9tuyeZk36wogQM1eWquGMl47JqkS34m6hqfYtaJIkAJ2xaKmv/s2xb3/pwS2lpQAxCQEmTiQyxUevHPrZlSe98vJ7Ht5ZS0aSLPPdvXBHDibsm8sGKjJTupoK869K64lRecl5h69cUr3gyw+KoZQZTlkOgYmNvt0gbyKaaZz8VxkAKV6xqPLmFy3LX7rhtj1/fIAR5xXQKazy21ExkAhoQULDbouKiEvABYlpSTn42kf1igRUXZ163PiPLl6XJiK/DQns2d88+ZI7dy0o3dKjCa776PGvPvmgVqYTCc0kBWoNVU0EJISgTPHq5YM/v/KkV1xx931P5nusy/iD9otSkBQQEHdunvu3m7aLqmTmNZPVt244eGIkqTWzt244+Lrf7v7xHVNyOFGK8iCNiJQm0kRt80lK98qoOjaVNJPWLAWYSGsmZhKUCGhNmpkIUoASKE2Z4npLDaQyUyQlpIDW5BgpKZDp/GwyCQgJMJTONbYgItZseB0eTokCaxLwDJJytNxaVQ4CnhBELT52xeDESKqZROdSh0wOHHZQdee9+w9ZPvCDi9Y99+ixfHeV5kSK/XPZGVfcfdjSgW9/dC0ThIBSvPKg6k8vP+llG+/e9MR8MpJmmbYmq8HrWGDWqQEP71j4t+ufpLGUNFNDX/e7vb+88kQhwUx/+fyDfnzbXuSHB6TmM2JOhpLhAbHQ1K05RWAxnGpu9zRkxdlci5gplWJIqtkWEdIhUUnFfF1n9RYNJkgFK27OZzSXzdeyRCJRSCQW6pmabSlmSgSlbdsvBHSms9mMqnLRSJpKzDRUfbZFgBhOtKayXh9UkrDA7OfHJ0Vp/dHTHHICBTVampmU0iSR4xdEvG2qcdyqoZsuW3/4ssFWplOJTHMixa7p5lmfuff3907/Hkgk/s8Hj4MEgTLFyxdVfrrxxJdffs89W+aS0TTLjFxU9uXRskvVVCTjqRytKMUYx38/MnPH5plT1y4ioiOWDlACJmbN1FBnP2/JW1+8/LhDh4arYqGh7nuy9rWf7fjRH6cwKCGgW3rl4uonLjgiTcRvHp659v8+dd6Ll73pRZPHrBiqVsT+uexXD+y/6sZtT+xuTIynV7/n6JGqnBhNmDmRYObLz1v17pcsHxxM/v3Xu775y6flUMJEupYtG6984JzDznjWouWLq1WJ2Zq694n5f7t1x8137BXDaSgI43JQxR3FYqHOyQFWERbNs8gPRxuXAgHUbPHbTpv8m7MPnRyrZIoTiZbiNBFbd9XP+sy9d9+7/41nrty+r/nNH25vtPS/f2httSJYc6b0skWVn1y+/pVX3HPH5u4ew2r5bdRwwgXS2zCC1kRM1aRNqKhOMVVV89c+eOwb/ny5+RhrDhn5ixcsveaW7e/76qOoSq3poJHkva88hIgOGpLrDx780Dmret8xifWrR89+/kGnfuKuqZp63emTQorc5AsQM7/guIn8rZu2LXzzJzuSUTRmW88+Yvj6i044dHKg+6VLF9HqFUNnnbL0ym89dul1W5Pxqnl+QI4V5zIbam8Tmye4hLcuTYez2rtQp8lEmuDv3nJkHhcmEq1Mp4l44In5Mz9z3+ZHZ9937mFXv2fNzHx2luLv37pzrqG/d+HakcEkU9zK9OR45daNJ776yrv/8NBcMpZmmdkT1ZgGYd9Fo6Wz6UammTRRS792w7JnHTlab2bVSvLwjhopVrXsK+9f84Y/X15rqsGKnJ5r7p5qLRpPDxqv1JrZu85YOVPPLrz2MapIpbnZzDTRhpMWjw6nRDQ102xmevniAa11ralXHjRw5RsOf9vVD2/dVR8ZSgRo0Ug+xQbT8635WjZQTaZmWyRFlullE5WbLztxcrzCxDummr/aNN3M9GlrJ45YPtBo6U+9bvUdW+avv20qV36eVxfcFMS7oPRcxiQ08IbdrXSJBx9NFF4dd/uQKc0gkkAr4zQR//3IzNmf2fTUtoWPvXn1596yuqV4bDj50SdOeO3n77/5P3ee2dQ/uGjdxEjaynSm9JLR9NbLTjzz7+/9r00zyXjnHDtcCDoPxKSJ1x06dOGbjqgOygpwwqqR1zx/ie6A3d/+7W7KeMOzF79tw4qFRjZUTf7tx9s/890n99aysYr429cccuFfHNZoqQ+/5tBv/GbP3Q/NSoFEQhGlUmSZvuy6x6/9xdO1jF92wsQ1718zXJWaecPxE8OD8vmfvFs31AvXTdx48fGNlqqm4gPXPHLzbXsro8lsQ4uRRNXV2qPGZueyyfH0N/ftf/3/c/+26SYRlgwnN1yy7pRjx5n5orMPu/H2Ka04OGbbqucvKuZgx98y5yaZ2ZDBsb5OCb3fV9PBupg6DldL6TQRv7hn3zmf2zQ91fr0u46++NxVmdISyJQeGhA/+Pi6Nw+I797y1CuuuPeGi9ctX1RtKa00jw2nN1964lmfvvend+1LxiuZcsgi7tphAmnFxx8+ctXbj+7BWcyJoESKz31v628e2E8V8ZYXLWPiwYq89fa977nqPhpOSWJujj72xQdXLa2ed9oyInrTqUvvvnc6v3OlOK3Ib/znzk//+xaaqJKk79y644XHjH3wNYcqpUYH5dCA3DnVpKbeV8u637uvpqbmMuq6xgPyFw/uP+4jt594+PCmbfP1PU0akiRo75NzV9+8/dS1E0x88JLK8JCcres8guJw/xgcQLoWnDDJstXe0Aw4sHBJKqjZMzDTnCbiP36/+w3/8ECjlv3TB475wKtXtpQWeZcQkFKcpvj2R9YODSRfv+GJl228+0efWL9qcqCVaSIaGpA//OQJr/n0pp/cMZWOV1oZ+2oK5j4T5R/M37V7unnV95/40i1PiaEEip975HDuJW/dXX/J85amo0mWcSKRzWd7ZppaM0DPXT1CEqYs3XTXlByQIgUR6aHkwZ01MnveSlCCpIelUyqBBDKB0sxMxIxEtOZbd22Zf/6RI8e8YGh4QAylQjfVyceMaWYBAkhYc8siIzyK7Cl6vWHhQ5WIe2vhxgNuk267NTnn/6OYUymu/fnOt/3jAzIR37xw3ev/bFkr01L2UCUB0loD4tq/Pma4Kv75O1tfetndP/zECcceMtRSmjRVK/LGS47P99g6xz3dwcwshPjt/fv//Rc7/+m9xzAzBPZON5//8du3724mY5Us04sG5dLRChG1MvXOMw5+5xkrnaCg0dKVVC4eS6mCHITKl7zWYkVEmgFSzF3uqzcirIvg5eejMxGqM+UAaOlLX3f4e89YuXRRxVnHTOncR3O2AKQPJL0y3L9alDGLFEomCmRJSkGZtllG5nx3//FH2972D/ePDCY/vOT41//ZsmamE+kSKQIgZqX56ncd/fG3HvHo5tmXbrzrrsdmUym0Zq25WpE3XHz8y561KNvfShM3WZyZWLMQ2D7V+OdvbPnc9U9IKZotvXRR9UOvOdRs6dE9JJlipZRWSivWSmuliLmaAESp7HpyTF1Db8tTCZPW03wQEno+u+L8wy59/RFLF6VENFfPNj0+98fNM797cP+jOxaczFqAolkuTH1lGXtYNAoL3QvolA7pKESzpiaGZHutiZmJGanE5d/asvHazQdNVm+85IQXHDueh8JBsRQCzJRp/uybjxyuykv/1+aXbbznxkuOzz9FRAMVccMl6//is5t+fPveZKKStQL6KpVIlg9e/u2trzpp0Ymrx5qZ/shZh918576f3b1PDCdzTb2/li0ZT9Mk+fwPtn7n5zuTkTSXSykwW1MtpQdSmTEThI2pINBUyBwfSg4ogK4pUxmPL0rf8/IVmWKA7tsye/7n79+8r6kFqZnWGzcs/8aH1lqtjjlO9YPKs2tCJ5hdtc9B5DUoB0gkmlP1M09f9ndvOEJploK0br/+4a89uvFrmw89dPgnG096wbHjrYyTpK3U2LMBuUKUoEzxp847/IvvP2bP3sYrrrjnx3dOpYnQmpWmgQpuuHjdGc9Zkk0325eyF0MzZcQNRe+65lGtmJg08zXvOXpsWIKpOZ898ORCTousWTF0+4Mzf3h09vYt87c/Pn/bnVMEPnxycO9s67HdDW8WNIeIY7A/Q4vbt5E74UKAMn3I4sr4kFSspcA1P9vx4NZ5MSDTiiSmFYurFB4qywde38A+/S+K8gaLcvDRST+gbLr57letvOHidYtH0zw6zVn2v/qnB7/wzS1HHzX6043rT1o9kilOk07yLVAwDV4Kain9wf9xyP/88NrZ+ezMv7/3+7/dnSZCMyvNlVRcf8m6Vz13STbdzHME3Ktoqg4nt923//M3PFlJRaOpVi8f+n/fcqSaa0Hgm7/ZA6DWVGefsnTjO48akqCWhuKzTl/2359+1k8uXf/UV1/wqhMmqJ5JaYxlCI2OdedBALn2IqLnHTWiZluN6aaqZQTM1HW9xRIgomcfMUKaG9ON+u76mlXD7z9jRe7ZhTJEqSybJ5aQ5YRJATyay3I22oaTa+rv3rz6E+evUjkkz5RI0WioN37xge/fuvPE9RM3XLxu1eRgDmO5jIobebddNRBJgWam375h+UhFvOEL95971X1f+8Axb3vpwXnslCbiB5ccf/7n77v+D3tpKDFBS26TSCxH08u/vfWskxcfc8hwrZG94+UH//D2vTf+fu/3/7Dn9w9On3LsxEIju+z8I954+uRDT8xPLqqefMx4o6WI6LcPTN98xxQNJEqxZtZMun1jBqTDpJkUMxtt+pTiXCIypT961qHHHjy4fz4bG5IXfOWR7bvrW3bV1q4arTfVBS9ZXk3F3Y/MHLZs8LzTl01OVBotlULo7oyM9pdSYPBPFE/kWHqliOcclagCKUjPZ6970dJPnL+qpXQ+FyuRYq6Wnf3ZTd//8Y7TT1nyk43rzd1la5yW1eO7l1rNnBvwRFCjpc47ffKGi08YrIq3f/HBL964LZWCmZTiROC7F6477YRxqisBCAEpAZAE2h6tQK2p3/uVR0GUJoKIrnnPmmVLKs2GfuM/PrT5qYWhaqKUOmrF8KtPmTz5mHEirqby4W3zr/+HB5odHkcmYrAqctLaXBgpSIAqiRhIc2CWxYC8a/PsXZtnBypJIpEm+MtTJ9/+8hVnv2Dp+ECiG3rjt7aCaKAimeiNL1p+1TvWfODMQycnKt/6xY5d+5oCGEjbK5IICNBAKioVERlrz6UautiLLi5Bp66aJcXHrRxmopaiTHEixdRM89VXbrrlP3e96iXLb/rU+qXjlUy38XcOESMIVRt1tUcq0WzpV5+85EefOGF8PP3Qvzx8+be2pIkAsNBQSSJefPwiqispqNHStYauN1W9lTOMUErLkeQ/79z3xRu3Kc1Ts63Fo+lVbzpCSnpsT+O0T951zS3b9+zPcsCatX56qvmvN2077ZN3PbGvKSuCmBuKH3+69shTta276wsN3cN3BWZq6ok99cd21h7dWVOq/SBzmX7l39/71R9vf2pvA52qeaX0SFXQoPze7/e+7qr77t86R0xEutVSm59a+Mj/fPR9X988tZBt3V1//Ol6nuY6U1dbd9cf2VF7bEe9pfpM7HVyW83XXvdfkQTVWO4Zd60vN/Vxhwze/rlnD1QlET25u/6az9x31937zn/liv/9wWMrqVC6Tbt2h+RlqhdLCSIpkWlm3RtpJ0WPDAeIgExxJRF/fGT2Lz67adv2hb997aov/NVR+RVeeeU9t9yxLx2Wy0aT/Gtqmd4zp/KoCLlWYT50cSVXqpVUbJ1qEpHONNXU4iXVI5cNDA7Ihbra/HRt394mDUqRCK3btqLSbgTILSZlaMdEIOkY5abOFTUDYKWppsYWVY5YWh0elKwxNdfavKeeKRISer4lq8lxKwdHBmW9qR/eUV+YaYqxtCrymJuaipkoAUmBXD03NYcyHmJxTeB85huMKAkY0P7GqwJcy563ZuwtL5psKf7Szdsff3z+LWccfO1fH5tvkEC5rvffonNq1Gi1ozSlibjvibk/33jPnt2Nc/5scsO6iVvunvrhH6cwIFkTKSOxNxFGh1wQE2W6B+SmbfUjBKmWplYHdk0h05yfZ2tWeCCJwh7AZgJqICGgMqaWbt+DIEpFR7FDaaambl+wIqSEUl6rOfJGcP8JP90TXDDXsiCBlCEE1xU1FQE0KAXRg198ztEHDxleVe9C9Yb6+s93Ts+2RALd1CuXDb7pxcu/8Yud23fVRQqtORV404sPnpxIXceSwMxSivUfu/2+x+d1vkyJwKDMtyMVvVG2XWPgjw1nw5OTAgALQDNrTdpKEAQRCwHZgfAy3T5KQuRSCxArJtbkjC9OBNqjbADNrBRpOw0M6GiW9s2YQ6vZIUD5maTXh3OyHCHyGwx7+eUgYrBmMSDEoCSQ1qwzrjWZiVz3QLMQ2LKz9t4vP0QCJEALas1xo29+8fLL/+OJzQ/N0EBCgmi6OTicvu8VK5TWpnwQMQSU1kqzZkqHEh4kZm6nXxK35jLSHoQOkAClEKkgbSw0iJXO5lT7aSqCqtLNgAR0TelWJ4d3SJIAgXRD6Y49pgFJqTBH9UAgm89IdXjMBDRoxiloSxH7o6DInlt6YGlTfWywTxqjLOTirkYl3WtZy3aBuZtOn4yllEgpSFXUotGUiJaMJlsnKmIgEaDMT0ExRjRJ0e4Zo3RutdvfJEHnnr50ZEDmmVMg0kS1lp5r6L37W4/urj+9q06pEFWpddtSLptIz9uwPLfudzwx96sHZ0QqtYmNt/Tp68affdhQK2MpcN0f9+6ZzSjj56weOe2osWamKyluunf/IztqIhWa2yde19XrT186OVppZHqgIrbsaVx/+16k0tQpdtoC9WfD+BkiH4G02fgw27L0WiPLsRBKa8dBZIwhyLUVYB59dnMJbaKL0fkDS+DL7zjqoHY6hPssUzOtX9w7fcV3tt7z5DwGE0GkWrx6cvBL71qTv+maW7b/6s5pUU204i5oquvZm0+bfOcrVuSv/PqxO/bsb1FDvfLZi6983RH5i7u+9MAjW+ZFVWjFSSKyfY33n3nIl9+9pvv1Gz51V96r1UiCh10+X5An441FekbHWPSnB0qb33A/mXtKUTbbUrOt5mxLzTSn5lpEND2fqZlWc7bVmG2pmVatqR0AuLeZRIlZ3tLr+cV757JM64VGq5Up84k088RI8penTv7q0yedvHqU6+0iqJbSmdIz881M8UxdhebB02wtyxTP1lqNVpa16y0w31CZ4um5Zqa40dL5B6VENtN86XMX/+M7jm601Fw9Y83nfPben98x1UmNpj4mW/gLzpG61gM7wQg17CttWu0WZfRchRDSlr+2ZCx53UuWKSIJ6IY6+rAhIjr35IMeXTEkqkIQ1EJ2wmHDuZKEkU7PgQwHmEPnpKBEECVi/3x2/R+ebimWoOVj6WknTCwaqSzUs7Hh9Op3H/2Ci+/UbVSqU+AlIeEZhtzTEZRXgCUC3fHxEpRIJJISibzsSQg0F7LVKwav+/BagJXikYHksm8+/oNf704WVzpZKAXZF+yFMIjUjtAz8LOSA++VyOEig0ILke/6skXVa969pq2vmJNUMPOnXntYs6m7tnZ0OGHOo+euqPRAL+YizDaRYuvu+ju+8CAlbfV9xPLBmz55/JpDhpot9ZwjR447fHjT1oXuiA+2rIo/BaL39WAbhOloDgLrjIcT8R8XrjtorDJXa40Mptf98ukrvr0lmah0CqK4D6yxACHmA2Ef/KzKA0oACeLaxljA7ghMdkNbFgKPbFs44aO3sxQSpGrqOWvGfvfZZ224/N4/PrRfDkoA2f7Wv/ztsX+14eCW4kQGnl94/FPH523r1USKZDylRDBTIvH4toV/vnXHl95xdNbM0lSuXJRueixPIzLbUncTNLUvNLBmXLOdDUYCyGrZdR9de+Lq0fl6a2Qw/e+H97/96ofEUKKcwiwnKe4ZhbQHtrtEwblJMdiSC1/sug+91mHMDDvNQDM3NZGkPEOyzkxENa1bhBZBEDRTvRXt+QMKAQ7Wb3b7VPTaRAEM4tma9pdJ5KpYgjpjwhIBkqapYWfiY/49iYSebn3m/WvOPXWy1siGqsmOqca5V91fz0tydJ94MaL6OQpd9UEXRrxoxGsiKHxwA7dqLAzc5DwhiUESUAI5fZYAAGTOIArk0KY5QMCuwYMbQvUmDeeIBGfTzVxFZ5oOWlR954aDleaBity+p37PlnlUJTe0mZJRa+hsupkBlLUD3CwB7WvWGtoACGDjBSCinfuar3rJsovOXdVoqWoqW5l+7efve2JPQ46kkSJY9JFVwVE+8k+Kg4tsAPpXH+bIdGEMXOqyeFoxyZxo4zyVIoeQFLMAtOJGpr0shh44FZ62zj2+ccWi6iffcjgDSvHKscqZz1+6anKg2VIkxUX/Z8vcXFYZTZudMlQhoLV+6foJet+apCq04tzwC0FZXW9YP67bWLqbgiIFac1nrl/0lpcerJkBail+9788/JtN+5OJStZ9BPgTByjSQr2UDnhGYJZtg1E4PxLx5sHmBDI7s6uNFrZfGx5MJgaTuaZOEmRMIymIqCopIZJEpDmtikMXV8yvNeengoIeVg+zVpqXLapc+fojjRvQ9WZWTeVF/+vRb/xoW7JiUBlBixRQWp+8ZuzkNRPB5ckyLSItSTTrD5+zilm3Ml1J5a837fv6zU+lB+WZoB3NwwWDwwq6IRVO8eyrkKz38aQw7TZ4c5EqaSfHxeIHOS/oOGxy4P4vPKdWVxCCNY8MSc38/Y+sXagrCDBTkmDV5AAzSxmBSZmtobmw9hgBF0kMVNDM9IfPOYwFPn/9k+loqjrxVl42WiD/gebXRtJys6XSBIlEK1MvXDvx1+cc+k83bEsWVbNMu4wOOIRewWuc30c4hD7oGgMbSUJ7GbO7xXMc7X+E+4/ywUsGHO/ae0XD26iehANe/8Se2RegLbvqF379MRaCiQcErT9k6IINy5ctrk6Op1ddcNR0LfvKrTupU62kNaWJ+M39+2+9bUpUO1AlSAC6rl7xvMWnHDueKS3MIVGd58vJx31zreGqFAKa+Yt/dfQD2xd+euc+OVpRSlszojlY0t9Pb2MTIeSimviIAi+oTeLe4EKX+Y/OMGC71KAXyHA7KVupPNsYzDovVssUd1JiQKD8rFNoj90TDE9vAVNz2fd++XR3C7/ZVF/75a7f/v1JY8OJELzxvMO/9bu9s7Ot/BxqzVKIX96//4prH6OJCunOyUtA+5oDI/KFaxepTCfmiciPPrOA2LWvueGTd73qlIM+9+Yja42sWpHXffi4Uz5+5+bdTTkglOID6Xp9INBDXy50t09WUel3rKd90bcYA5GZLfeIuwQPiEXnnILa9JIQoQQPh+bzHwnERkZcIpGMpslIKkdSOZJWlw4+vHX+p/fsSxORZWrFkuqxKwepyWbvnaGKTCYqA+NpMlZJxivJeGVgrJJMVIaqsqcb7G/WTFKKj33j8U1b5q+6ftv1v9s1WE0aTXXQWPV7F64bTogzBg6g+3ZJm0+zkqjfRm5sYtGlc7/6REQZQA8g78zYYu5LF3E3o9qz4bbKcFvcmq1w0fW8QQDlLtXikaR7jaE2M9hTXJo4y3SmOVOcaW7/oliz5+2hm2kEIpquK1GVsirf+uWHH3hybrCa1JrZSatHr/2bY3VdSZj2unhLUFZ31M8ChndH+GVJoQ/AblvB3gijHvAXy+zidjpdbwpxN4LgiM/Qyb9zKgmcmYlW/6xMcTbdyPY3s/2tbKaZ7Wucc/rki45f1MpUIlFv6q17mpTAKmFjO72TuVwN5qW3AlqxTDBTV6/9/AMzC1klkbVGdu4LJze+/vBuVm/hJIKgR/0MoCy2MddAHBwb2sleoFvcjLsn+GaYarDanTpGUFjv5r5ED/1kizriQCxhXJuXj6cXnb8KEhIYrYqTVo+89FmLNXO9qUcG0xtu27Vl+wK1/Sl4/KYXC0SW2ESmleZkSN63Ze5tX37w+x87Xgg0Wuqy8w/f9MTc9361OxnvhsX9zKslKirpj4HSCHME7bzoaPJt903mdblwsGAbBMgruIVwwChDkxt+MZMOqHrv4kxUzQFF9ofTUK5XldbLFlU+c8FR5ucaLZVKjAymDzwx98GvPiqqQmeamTLVVsuKA8NKiChvqpK3e+q6jpopU6x0rsPbvmGWcTJe+Y9f7rpy1ZZPnX/4fD1jUl993zEPbFu4b+uCGE605rK97Ec5kz1kmwLIidEtyC8A967ojGVGkUvHeXRRU9v2NI5ZOZzI/mmMfn8aTbVzXzMnEpyHXjycJBKJ9AkKVFO5d7r13d/uuPQ7W3fPqXRQ6oZOJRIpx4YEEUYGpDF3s5MqxzQ6IBKJkcGUqOuV01BVJhJjQykRVdPuB1llnExULr1uy/pVw2edspSIBlL5X1eedPLH7nh8qgnrnvlPWIM+PgsfyUIEIYOXWxHA26w4lxK8818f+fjZhywZT9skD/fonoCCMQ+4jU1Z/jeQZfraXzy9bU9TVIXW1tNqwtd+9vTkWKq4naqnNddaev98tmem9eCO+p1b5nftrtOgRFVkiinBjn3Nq2/a1mxxNRU/v38/VYXuVUtBM1NF/PTeacXUaOlEYPesIoBScdujs1f/322NTFcr8qHtC1SBbsN1pIioKt/6rw9f9nStkoqW4pGB5LlHjz32290iIS4iGyJk/AHk6ETdNCcvOhY1x+ATz3cHUaapodowLBCBO50Rds6YU/baULe1PwYkBxs+LmSkOfwECagijZRYyt1rWugk3VUFDch2zp7Z37WuqJd0l1AeNDXzpyPKUdZUWH6NAClN86rnTgwkVIHXasOf+dhPtkWBZEQ/lUSu26dH4HWzZBKJEBXJrgxypPtqDF0J/1HpTsJiD0ZkIpKjKcLyh7zURynT9DCkkOOyS2J2Gg4a0sYsBqUYams41UZjWFSEGJBdI81sNz7QDCHkeC/4zCu2ylayoKtZn+rauH97klcSACmj8CZCrIMjetDMWhlTYrWJV3cvwHb6LUXg7pBetyPe/HBY9BxArOMDTtuxeaYKCO82kKm7XRO4R2lrFU04zOUpUz7OXJAPQ+UTWPo1z4E2oqIsCdfvth7Xz1HpYw/DN49srONxyF13POtuOjf863Mf8aUzKsVkMgKTPPs4RsH55sWNxSk47OCAt5jDWyieEQzKkTm75CJf7NMzwelJfvt9Ds1JZOMKbG0zF9+//6UFJpD6mKzDpSDwgbDpkf3EgVwBngXkdgE4CgdH+P+MjUsKforj81IpNGsoJlXOzPXiWYeIYOkFkA4V4gzBwniOe6DUN4cf9564lGoom0/VmV0YnwHAwTFVXDhBqGD4MxWO4C0YToDQGFlfMjgIKMY5duqrJjNw5dJRs74y4L4TY9B3jkdoyISJDHIPi44QwAgeMsTHYMVGZ8QIRxTOfSy2x/1MP+ln8gbF1Q/F8fligejzyBYrhn58aQTCVJtOFX7PwsLRPfbRgW+SEfHgg7MLg5PGgk9bMKCdCnuLoD9Stv/xglSoPCiyehR3AtA3QdTnbHGLdhMRBwqej4NA9MbOxiAyH73UiiCaihs1otTfBF8u8xsQ33sOzQRHyIIUa2y2nEGOyYQPI3Khf1AstTDDpPiXMfchOByP8Cii1WO/lyo39BHwcKH0lAagFK3eOADyLiJh8LtAclg7xr6FKSJwQZ8mcIIpJEeRgUhu/FqQNVA8sa0f8xOceYZQbNNnZFJOffan24u3HHZFLheabV87xnaE4obPEoXEilkRhEnjAs7OCAFEZJ8iI4MQCaU4gqDFHKVYlFU8kCxY5I7QLxwPzAreEx+IyhQ6x6GN7PVy7kfa7GUEm8U+3G7b5uwu22SRM3sTxbE/F43FLbevxQFY6bBJLiRZnSL3oEz3Y/kKomeOxhHOAOZyNzkIb3Eh3tBV0RyC+61dd8QQEeyJIgxEPxKHwmiVvCAY0T0LOwSl5jY0Ta180jWXjYyjvgEWlLvS1F84bfs2otArRCFwCs/6ItRhAvEAjEIhNbyDi8LwgyOEAUI+MPexfv3gIf1kTnGhV+jcMhediwP6AcwVEnGP0hZnBHWC5xsDoWgPIZ3JZfFSkEQq2KriEDlkdwJaJAbe9U/1FAwd5RLXLCbMYa4F8XvpqWHhsm8UDNR8Jx6ByJ1jAQYXcjiIKHl7mVAAWyIEHfu+T+EyRVky9HekUAatGLG4teYdh5njM8C5sDUdQhKG7gYDLigPisCTxeaT7cQujlI3bgIURaa+BjFnDskZxePUfubJIjzN1pRO9JlujsKQzKmBZZcbcEgkeFNXXJyE47am/f9JWclbnHh3LQ17M3giCq37HiAy2jUWeReDCUE5KMWlOYSj2aYBVDBwtQzu9v7kxEgxp7C9RFwiP1zoaaOID7afn4vtn9eM7wBgAUTCWZ8iRAFkEwWPGCENiXhjdXuPgRDmgJKjE4Q7GIHJCgiNPS8FIsNbDl+diUIRhL15KDwoBcQfCtucxgKM4JlDxJ8P4h4dIxfMFoXzpEHOo+s5lqIrQfm3vwn0DCvPUCY/HPK84ECVVmWmXVviGrMYrWvW23MfNimGvPt/4ggkiXjdFBdqTo6MKSmgOFGGyfjmvhjq6Qdjh6VsYjkeppZmmEFiEuXJEQTVbDeEHQekfMS7q/l9q9MdoQnfu+bCsx7zkopxBup9KTszwkrbq/eTe8q9tUIp4+QLRnBWBIcPdzee7t04RBQf7P2CCHDD1B1qkKdKdW2MVTDMdgsGI6biEHln9yuyVB73AfMGaCszLoR1EY543Nw3Y8FUiFH7hwzRYD5mBOCNNIol91l1lu2rCBf78D/GdoQTyHALBkjUVhcIVkg4dtkTMVB8jWJHmYsAB/i32qfp476i35Jt597qxdgQFCpsK9JEYMsQisbhjtXxAUs7bxns2Rjzi9mDHTkUp7N3sOIUW78HKEK2MAWHzYQ3mx0k4E8BDOO4jmP7+0/z6rkBbGW6+7GMsdmi92AF3b/dZhhx1YSyBAc/WbDI00FJGhTKThMMXULOIGXHFnheLhfr6r7zYYG+nbL4MgSWkQOi6a2z6D1YMAoNJ93BsihAUZKNe1nbCqKsrMPtkIV+/RT3YsXTlTksPThg8+u9CwdWEsihkKX4gwgFYIE42DeNbmvXjlAx27EQ+01oithvFEYCYfAkVuN0gAer3xpO28H+k7id/gwNx93E4GMh8uDet4nIU5lz9DxkLjfycIwWypvEB3GP3ANH/7hucQbTgfpEKD9beKbKua/vQgBTRyEfVkBCI7bBAXnxcx48oAMRX4ILRBRhZcLeHXCfh6ysf1hUlx9owYHN7fRZkv8MtDpFPJ6+Wle6Z0lY5zV8hVhqHIp8H+4ng4JCZSZd5AEHcmjiORhAf3aXohgxH0hRxP9fu96d63NgEuh4Xiw81Yowfs5xYMHMjuZuxV8suIOXMu7Y/BjHWaw9OSr+njcSeqXQoYLvriO61UE00XEto1QDAqob/VSh2eJoq2gOL1B322BA9ubrrj7vJy2bIzgNGZwV97ephWl1KAi+YXuIxu9Mds8o9ipIHVCP4/gfx7EgD8tkjmKr/eb9cWfouJvhZcfBTHYyqQfl9dqceX9i2BQLorfSF42KskoIKqT0TScxlH1ogmh2R1OrEzWboWBBQOM8hJPVHPuFPWH1OBt4rdB9BgwhdQY/Dg47bBxBKhBQqoilHBj9hjleaOWO/aJC0KQU+zE3EtaduxCpM509SAazRXMxhauw4FlQosKaDz/64IixZ3t4WeSpYcRmQGdANCMiF3aWJJvEsF1/3d0feEm/VtYLeg1W3NImipoiS8fEEqYQ1isEA07xxgL6CJ3vnMOW0TbFgj740OBmwEsg4bA/YTECiGAioYQeGCQCuicYJnTFoSATcaTGI204iLaZzRV8bxY9Zh7dSn5bowJ2fw9btVoOCQew9RjPH+zzGdBDhjL3TzB7uhIUj2eDdZQh3gwFISuFiwrtmEhY9tx1X9gg9TgqpPC0TWxWZ0HrajZG1oQRYO75AVEEqMDX5dAIMY5G227Nut+kJphohjhexnHkIhJ5InaZiHlyEg0AIw42G3I6EoHYaLVQVSA7hxVx6fOcKcATaxTnmdlbUZB6jWgWJqjQceuOb3GE2O/eZvgg1hs4XqDbjS0RCkwiKACKw04ngmVhhyg93e3mSLM5dI+jwEXUX0O8UIXjz8BxPDKY7BHMuuVQvFZQ2Mi9lkQcP2FwnFAPUCsBOA0bhJDscozR8ms12C1RME656JkxxzixFz4VA7nhwIDL2jDAQ1HM7A6U1Z70WVQehLe4X88lrBv7BNcoVJQcHC5mwwDwbHBw/Gx0cgu6PTrIXUcHJYA1mCgKCQHhbhBwzhwC6wVDxXFwmbgwpkRRnRnD9svMW+1nQhTsYIbjMTpcf9tnVsjrJcWRp2Cv9VWsRIudhzXYv15GR6xFl2Vsguoo2G8F8bJPHyKG5WfB7FHInoYP1ZNx0G3mEPjMLkgUbSriHDa//xDbD8IRsfS+y5ofDCurF0acbVWcGAwHk4sGWlrPfUBh5V756Gz37HLXLHmpd84rvRODeCWW8QY2ghDTsCGGg3oNIVCYlwrv3LtpEpFCRSZrcm5M+7KNEzB7RVDsTuUDnAafFJj8xeFBSSik6Qr54JgV8b7JNAZWXwAYOacwRmJxUf+bMLHRydEM9g9h8gISRDocm7iuN5sIwRpJD8cOkmO+PQ2OFGEHo+UQegp3NWIBUhEmYaNvneMjAi6tj1NyyJMCPI+3gzk4OX89kK8wbHV7ZPmV0ezaDjhbYtsFmHNjDTyrBLrxNowjhRwckrAuccQGjwRETr83xN1NdUbo7Ma5aBiQQyer0nQiEGji5EeE4MICPYrmigWquOAaPO4mecESGt9+w/MbS/uclczc6JJ06Bx3hCKfrq4yWAF2RlUgNN8h5pmxYRZtpsHxdbjQH2QbaW9nVbLX+QC2U5CPtALiPFfkuFOMA/GVIWxAke2qGeNOYhQvU6Er549tgY3TeQwP2J1lEHS3fcoWvtNuH5UwbNXlr8zUVy9ryqVzHC8MVuYsOzY4oIjYcu3Cywf3neGc9UjZOGB19w73ivDKLwMsCgpWvSc3vZCPDUMQQqOICkkt9tB42HwUbI+B/AG5RS1S2XBiYLtg5ikPRiU2RSECViHY9sr0Rxz6hSO16xZ6zpEevRzyaxBt+h7ly9irdmFP38S0XKx7i00R+h1VrR7cZeMkmaPoepiGsuuD2TRevr+BgJ5Hd7Qdh7Jf2MNp3X2lwDQWi/E1pBgIkRa+3+j3ZigoZecI1O57QcaqoQDW5lCmCgWmQhaVBHPBbEfPbPnuhf2kZhqFeT/u5b1kGJfw5w4a1T3+8DbVqUgLzGrxIndLKiMEqutVxTMCUNCwwdMBESo8Dp2irAMcOi5xCBcM7yWHoGkHt+fIjQW9DURSjO3DbShUYRwsdotbTCiDbcgpKpgcaa9IUScSFO6YxFRYhMWu54UQHB1I8uJwsBvuudrl2eARA0EsOMZrxdYBITmzEUMThuMYlEt2WlnPURXepthtSEEhXszRCf5tIaQ8EXa5mY2YJIgv2rwhI07aeL494Blp8x5j7Ua7CWx9mNgoJIEIyVnQEd/sXYhAlx0rmST0vbDxLJBoFwxyqKs7Owl4xvIxAvAv7LiFy8LN6CY5zD+saBIejOSIoDO9gBGopkWQD7DTCoqbUnFByj0CU+kR4bisWZ1+C25H8rnMlrPlebGZVUkUCIILqBV4TIjjdQcGPcKrOIWF37ITJtqJqxzRS9E5xx32oudk2IiBk7PBVFQIw4UklkOfwy88N/Rc0HGE0RA0MOwRAY+H2Y2w2UCBOkCHESP2stTICrdhRGNAPA4urZ+hQOeGHm3CNpVkJDUCVjMUx/9k9vAKI8/XKfntljjDBO8i2QGMkDMV8/UQaFUDo3Er24vmYAOM3uPDW+FgLzTY8QJsNpaZQP8flHZuEWNTy3MAAAAASUVORK5CYII=" alt="RentalBHK logo">
+    <div class="brand-text">
+      <h1>RentalBHK</h1>
+      <span>Where Owners &amp; Tenants Connect with Trust</span>
+    </div>
+  </div>
+  <div class="top-right">
+    <select class="mini-select" id="langSelect" data-onchange="applyLanguage">
+      <option value="ta">தமிழ் Tamil</option>
+      <option value="en">English</option>
+      <optgroup label="மேலும் மொழிகள் (விரைவில்)">
+        <option disabled>हिन्दी — Coming soon</option>
+        <option disabled>العربية — Coming soon</option>
+        <option disabled>中文 — Coming soon</option>
+      </optgroup>
+    </select>
+    <select class="mini-select" id="currSelect" data-onchange="renderAll">
+      <option value="INR">₹ INR</option>
+      <option value="USD">$ USD</option>
+      <option value="GBP">£ GBP</option>
+      <option value="AED">AED</option>
+      <option value="SGD">S$ SGD</option>
+    </select>
+    <button class="icon-btn" title="Settings & Feedback" data-act="goToSettings">⚙</button>
+    <div class="profile-menu" id="profileMenu">
+      <button class="login-btn" id="loginBtn" data-act="onLoginBtnClick">உள்நுழைய / Login</button>
+      <div class="profile-dropdown" id="profileDropdown">
+        <button data-act="quickSwitch" data-arg="customer">Customer ஆக பாருங்க</button>
+        <button data-act="quickSwitch" data-arg="owner">Owner ஆக மாறவும்</button>
+        <button data-act="goToSettings">Settings &amp; Feedback</button>
+        <button data-act="doLogout">Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="topbar" style="padding-top:0;background:var(--navy);border-top:1px solid rgba(255,255,255,.08)">
+  <div class="role-switch" id="roleSwitch">
+    <button data-role="customer" class="active">Customer</button>
+    <button data-role="owner">Owner</button>
+    <button data-role="admin">Admin</button>
+    <button data-role="super">Super Admin</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============ CUSTOMER VIEW ============ -->
+  <div class="view active" id="view-customer">
+    <div class="search-row">
+      <input type="text" id="searchBox" placeholder="ஊர், ஏரியா அல்லது PIN கோடு தேடுங்கள்…">
+      <button data-act="renderProperties">Search</button>
+    </div>
+
+    <div class="cust-layout">
+      <div class="filters">
+        <h3>Filters</h3>
+        <div class="f-group">
+          <label>தேவை / Looking for</label>
+          <div class="type-toggle" id="f-listtype">
+            <button class="on" data-val="rent">வாடகை</button>
+            <button data-val="sale">விற்பனை</button>
+          </div>
+        </div>
+        <div class="f-group">
+          <label>இட வகை / Property type</label>
+          <div class="cat-grid" id="f-cat">
+            <div class="cat-chip" data-val="house"><span class="ic">🏠</span>வீடு/பிளாட்</div>
+            <div class="cat-chip" data-val="land"><span class="ic">🟫</span>காலி இடம்</div>
+            <div class="cat-chip" data-val="ground"><span class="ic">🏟️</span>மைதானம்</div>
+            <div class="cat-chip" data-val="hall"><span class="ic">🎪</span>மண்டபம்</div>
+            <div class="cat-chip" data-val="shop"><span class="ic">🏪</span>கடை</div>
+            <div class="cat-chip" data-val="builder"><span class="ic">🏗️</span>புது Project</div>
+          </div>
+        </div>
+        <div class="f-group">
+          <label>City</label>
+          <select id="f-city" data-onchange="renderProperties">
+            <option value="">Any city</option>
+            <option>Chennai</option><option>Coimbatore</option><option>Madurai</option><option>Trichy</option>
+          </select>
+        </div>
+        <div class="f-group">
+          <label>PIN Code</label>
+          <input type="text" id="f-pincode" placeholder="e.g. 600040" maxlength="6" data-oninput="pincodeInputCustomer">
+          <div id="f-pincode-hint" style="font-size:11px;color:var(--muted);margin-top:5px;display:none"></div>
+        </div>
+        <div class="f-group">
+          <label>பகுதி வகை / Area type</label>
+          <select id="f-areatype" data-onchange="renderProperties">
+            <option value="">Village / Town / City / Metro</option>
+            <option value="village">கிராமம் (Village)</option>
+            <option value="town">நகரம் (Town)</option>
+            <option value="city">பெருநகரம் (City)</option>
+            <option value="metro">Metro City</option>
+          </select>
+        </div>
+        <div class="f-group" id="bhkGroup">
+          <label>BHK</label>
+          <div class="chip-row" id="f-bhk">
+            <div class="chip" data-val="1">1 BHK</div><div class="chip" data-val="2">2 BHK</div>
+            <div class="chip" data-val="3">3 BHK</div><div class="chip" data-val="4">4 BHK</div>
+          </div>
+        </div>
+        <div class="f-group">
+          <label id="budgetLabel">Budget: up to <span id="budgetVal"></span></label>
+          <input type="range" min="5000" max="60000" step="1000" value="40000" id="f-budget" data-oninput="onBudgetInput">
+        </div>
+        <div class="f-group">
+          <label>Preference</label>
+          <div class="chip-row" id="f-pref">
+            <div class="chip" data-val="furnished">Furnished</div><div class="chip" data-val="parking">Parking</div>
+            <div class="chip" data-val="family">Family</div><div class="chip" data-val="bachelor">Bachelor</div>
+            <div class="chip" data-val="pet">Pet Friendly</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-head" style="margin-top:0"><h2 id="resultCount">Properties</h2><span class="hint">Sorted by relevance</span></div>
+        <div class="ad-banner" id="adBanner"></div>
+        <div class="prop-grid" id="propGrid"></div>
+        <div class="detail-panel" id="detailPanel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ OWNER VIEW ============ -->
+  <div class="view" id="view-owner">
+    <div class="section-head" style="margin-top:0"><h2>Owner Dashboard</h2><span class="hint">Ramesh Kumar · Chennai</span></div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="num">6</div><div class="lbl">Active listings</div></div>
+      <div class="stat-card"><div class="num">1,248</div><div class="lbl">Total views (30d)</div></div>
+      <div class="stat-card"><div class="num">14</div><div class="lbl">Rental requests</div></div>
+      <div class="stat-card"><div class="num">4.6 ★</div><div class="lbl">Avg. rating</div></div>
+    </div>
+
+    <div class="section-head"><h2>My Properties</h2><span class="hint" data-act="scrollToId" data-arg="addForm" style="cursor:pointer;color:var(--blue);font-weight:600">+ Add property</span></div>
+    <table class="owner-table">
+      <thead><tr><th>Property</th><th>Type</th><th>Price</th><th>Stage</th><th>Actions</th></tr></thead>
+      <tbody id="ownerRows"></tbody>
+    </table>
+
+    <div class="add-form" id="addForm">
+      <h3 style="margin-top:0">Add Property</h3>
+      <div class="form-grid">
+        <div><label>Title</label><input placeholder="e.g. Sunrise Residency"></div>
+        <div><label>Category</label>
+          <select id="np-category" data-onchange="onCategoryChange">
+            <option value="house">வீடு — House</option>
+            <option value="flat">பிளாட் — Flat / Apartment</option>
+            <option value="land">காலி இடம் — Vacant Land</option>
+            <option value="plot">பிளாட் நிலம் — Plot</option>
+            <option value="ground">மைதானம் — Ground</option>
+            <option value="hall">மண்டபம் — Venue / Mandapam</option>
+            <option value="shop">கடை — Shop / Commercial</option>
+          </select>
+        </div>
+        <div><label>Listed for</label><select><option value="rent">வாடகை / Rent</option><option value="sale">விற்பனை / Sale</option></select></div>
+        <div id="np-bhk-wrap"><label>BHK</label><select><option>1 BHK</option><option>2 BHK</option><option>3 BHK</option><option>4 BHK</option></select></div>
+        <div><label>Price (₹)</label><input placeholder="e.g. 15000 or 4500000"></div>
+        <div><label>Area type</label><select id="np-areatype" data-onchange="onCategoryChange"><option value="village">Village</option><option value="town">Town</option><option value="city">City</option><option value="metro">Metro City</option></select></div>
+        <div><label>PIN Code</label><input id="np-pincode" placeholder="600040" maxlength="6" data-oninput="pincodeInputOwner"></div>
+        <div><label>Parking</label><select><option>Yes</option><option>No</option></select></div>
+        <div><label>City / Area</label><input id="np-cityarea" placeholder="Anna Nagar, Chennai"></div>
+      </div>
+      <div class="upload-box">📷 Property photos — drag &amp; drop or click to upload (multiple) &nbsp;·&nbsp; supports 360° set &amp; video tour</div>
+
+      <h4>சரிபார்ப்பு &amp; பதிவு கட்டணம் / Verification &amp; Registration Fee</h4>
+      <div class="add-form" style="margin-top:0;padding:14px 16px" id="ownerFeeBox">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-size:12px;color:var(--muted)" id="ownerFeeCatLabel">Category: House · Area: Metro City (Urban)</div>
+            <div style="font-size:20px;font-weight:700;font-family:'Space Grotesk';color:var(--blue-dark)" id="ownerFeeAmount">₹150</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);text-align:right">இது AI + Admin சரிபார்ப்பு செயல்முறைக்கான கட்டணம்.<br>Rural பகுதிகளுக்கு குறைந்த rate.</div>
+        </div>
+      </div>
+
+      <h4>பணம் செலுத்துதல் / Pay Registration Fee</h4>
+      <div class="add-form" style="margin-top:0;padding:16px" id="ownerPayBox">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+          <div style="width:110px;height:110px;border-radius:10px;background:repeating-linear-gradient(45deg,#EEF3FF,#EEF3FF 6px,#E2EBFF 6px,#E2EBFF 12px);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--blue-dark);text-align:center;flex-shrink:0">QR Code<br>(scan &amp; pay)</div>
+          <div style="flex:1;min-width:200px">
+            <div style="font-size:12px;color:var(--muted)">RentalBHK UPI ID</div>
+            <div style="font-size:16px;font-weight:700;font-family:'Space Grotesk'" id="ownerPayUpi">rentalbhk@upi</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:10px">அல்லது Bank Transfer:</div>
+            <div style="font-size:11.5px;color:var(--navy);font-weight:600" id="ownerPayBankDetails">RentalBHK Pvt Ltd · 123456789012 · HDFC0001234</div>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top:14px">
+          <div><label>UTR / Transaction ID</label><input id="np-utr" placeholder="e.g. 402812345678"></div>
+        </div>
+        <div class="upload-box">🧾 Payment screenshot upload</div>
+        <button class="btn-primary" style="margin-top:10px" data-act="submitOwnerPayment">Payment செய்தேன் — சமர்ப்பிக்க</button>
+        <div style="font-size:11.5px;margin-top:8px;font-weight:600" id="ownerPayStatus"></div>
+      </div>
+
+      <h4>சொத்து பதிவு விபரங்கள் / Property Registration Details</h4>
+      <div id="np-pincode-hint" style="font-size:11px;color:var(--muted);margin-bottom:8px;display:none"></div>
+      <div class="form-grid">
+        <div><label>மாநிலம் (State)</label><input id="np-state" placeholder="Tamil Nadu"></div>
+        <div><label>மாவட்டம் (District)</label><input id="np-district" placeholder="Chennai"></div>
+        <div><label>வட்டம் (Taluk)</label><input id="np-taluk" placeholder="Egmore"></div>
+        <div><label>கிராமம்/நகரம் (Revenue Village/Town)</label><input id="np-village" placeholder="Anna Nagar"></div>
+        <div><label>சர்வே / புல எண் (Survey No.)</label><input placeholder="e.g. 214/2B"></div>
+        <div><label>பட்டா எண் (Patta No.)</label><input placeholder="e.g. 1123"></div>
+        <div><label>பட்டாதாரர் பெயர்</label><input placeholder="ஆவணத்தில் உள்ள பெயர்"></div>
+        <div><label>மின் இணைப்பு எண் (EB Service No.)</label><input placeholder="e.g. 123-456-789"></div>
+        <div><label>சொத்து வரி தீர்வை பெயர்</label><input placeholder="Property tax assessee name"></div>
+        <div><label>சொத்து வரி தீர்வை எண்</label><input placeholder="e.g. 021-0456789-0"></div>
+        <div><label>EC (Encumbrance Certificate) எண்</label><input id="np-ec-number" placeholder="e.g. 2024/EC/000456"></div>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);margin-top:8px">இந்த விபரங்கள் கீழே upload செய்யும் ஆவணங்களோடு AI மூலம் ஒப்பிடப்படும் — பொருந்தினால் மட்டுமே Admin review-க்கு செல்லும்.</div>
+
+      <h4>உரிமை ஆவணங்கள் / Ownership Documents</h4>
+      <div class="doc-grid">
+        <div class="upload-box">📜 பட்டா (Patta) upload</div>
+        <div class="upload-box">⚡ மின் இணைப்பு ரசீது<br>(EB Bill) upload</div>
+        <div class="upload-box">🧾 சொத்துவரி பத்திரம்<br>(Property Tax Receipt) upload</div>
+        <div class="upload-box">📝 விற்பனை பத்திரம் (Sale Deed)<br>— applicable-ஆ இருந்தால்</div>
+        <div class="upload-box">🔎 EC (Encumbrance Certificate)<br>upload — TNREGINET-ல் பெறலாம்</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">EC இல்லையானா, <a href="https://tnreginet.gov.in" target="_blank" style="color:var(--blue-dark)">tnreginet.gov.in</a>-ல் Survey No./Village விவரம் கொடுத்து பெறலாம்.</div>
+
+      <h4>லைவ் லொக்கேஷன் சரிபார்ப்பு / Live Location Verification</h4>
+      <div class="loc-box">
+        <div class="loc-status" id="locStatus">இடம் இன்னும் capture செய்யப்படவில்லை</div>
+        <button class="btn-ghost" data-act="captureLiveLocation">📍 Capture Live Location</button>
+      </div>
+
+      <h4>சிறிய வீடியோ (Location Tag-ஓடு) / Short Video</h4>
+      <div class="upload-box">🎥 Upload a short walkthrough video — location தானாக tag ஆகும்</div>
+
+      <div id="aiVerifyStepper" style="display:none">
+        <div class="stepper">
+          <div class="step done" id="stepPayment"><div class="dot">✓</div><div class="lbl">பணம் செலுத்தியது</div></div>
+          <div class="step done"><div class="dot">✓</div><div class="lbl">ஆவணம் பதிவேற்றம்</div></div>
+          <div class="step done"><div class="dot">✓</div><div class="lbl">AI சரிபார்ப்பு</div></div>
+          <div class="step active"><div class="dot">4</div><div class="lbl">Admin Review</div></div>
+          <div class="step"><div class="dot">5</div><div class="lbl">Super Admin ஒப்புதல்</div></div>
+          <div class="step"><div class="dot">6</div><div class="lbl">Live</div></div>
+        </div>
+        <div class="ai-badge">🤖 AI Document Match: 93% — உள்ளீடு செய்த பட்டா எண், EB எண், EC எண், சொத்துவரி விபரம் ஆவணத்துடன் பொருந்துகிறது</div>
+      </div>
+
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn-primary" data-act="runAiVerification">Run AI Verification &amp; Submit</button>
+        <button class="btn-ghost">Save as Draft</button>
+        <button class="video-btn" data-act="doAlert" data-arg="வீடியோ அழைப்பு மூலம் கூடுதல் சரிபார்ப்பு Admin schedule செய்வார்.">📹 Request Video Verification</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ ADMIN VIEW ============ -->
+  <div class="view" id="view-admin">
+    <div class="section-head" style="margin-top:0"><h2>Admin Console</h2><span class="hint">Chennai District</span></div>
+    <div class="stat-row" id="adminPaymentSummary" style="margin-bottom:18px"></div>
+    <div class="admin-tabs">
+      <button class="active" data-pane="pane-kyc">Owner KYC</button>
+      <button data-pane="pane-custkyc">Customer KYC</button>
+      <button data-pane="pane-prop">Property Approval</button>
+      <button data-pane="pane-proj">Builder Projects</button>
+      <button data-pane="pane-complaints">Complaints</button>
+      <button data-pane="pane-reports">District Reports</button>
+    </div>
+    <div class="admin-pane active" id="pane-kyc"></div>
+    <div class="admin-pane" id="pane-custkyc"></div>
+    <div class="admin-pane" id="pane-prop"></div>
+    <div class="admin-pane" id="pane-proj"></div>
+    <div class="admin-pane" id="pane-complaints"></div>
+    <div class="admin-pane" id="pane-reports"></div>
+  </div>
+
+  <!-- ============ SUPER ADMIN VIEW ============ -->
+  <div class="view" id="view-super">
+    <div class="section-head" style="margin-top:0"><h2>Super Admin — Platform Control</h2><span class="hint">All districts</span></div>
+    <div class="stat-row">
+      <div class="stat-card"><div class="num">18</div><div class="lbl">Admins across states</div></div>
+      <div class="stat-card"><div class="num">6,214</div><div class="lbl">Verified users</div></div>
+      <div class="stat-card"><div class="num">2,940</div><div class="lbl">Live listings</div></div>
+      <div class="stat-card"><div class="num">₹4.8L</div><div class="lbl">Revenue this month</div></div>
+    </div>
+    <div class="super-grid" style="margin-top:24px">
+      <div>
+        <div class="section-head" style="margin-top:0"><h2>Reports</h2><span class="hint">Revenue &amp; Properties</span></div>
+        <div class="add-form" style="padding:16px 18px">
+          <div class="type-toggle" id="rep-metric" style="max-width:240px;margin-bottom:12px">
+            <button class="on" data-val="revenue">Revenue</button>
+            <button data-val="properties">Properties</button>
+          </div>
+          <div class="chip-row" id="rep-period" style="margin-bottom:4px">
+            <div class="chip on" data-val="day">Day</div>
+            <div class="chip" data-val="week">Week</div>
+            <div class="chip" data-val="month">Month</div>
+            <div class="chip" data-val="year">Year</div>
+            <div class="chip" data-val="custom">Custom</div>
+          </div>
+          <div class="form-grid" id="rep-custom-range" style="display:none;margin-top:10px">
+            <div><label>From</label><input type="date" id="rep-from" data-onchange="renderReports"></div>
+            <div><label>To</label><input type="date" id="rep-to" data-onchange="renderReports"></div>
+          </div>
+          <div class="rev-bars" id="repBars" style="margin-top:14px"></div>
+          <div class="rev-months" id="repLabels"></div>
+          <div class="stat-row" id="repStats" style="margin-top:16px"></div>
+        </div>
+
+        <div class="section-head"><h2>Pricing &amp; Offers</h2><span class="hint">Property registration &amp; owner offers</span></div>
+        <div class="add-form">
+          <h4 style="margin-top:0">Category வாரியான Verification &amp; Registration Fee</h4>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">ஒவ்வொரு property வகைக்கும், Rural/Urban பகுதிக்கும் ஏற்ப கட்டணம் நிர்ணயிக்கவும்</div>
+          <div class="form-grid" style="margin-bottom:10px">
+            <div><label>Rural : Urban Ratio (%)</label><input id="ruralRatio" value="60" data-oninput="onRuralRatioInput"></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Ratio மாத்தினா கீழே Rural rates தானா recalculate ஆகும் — வேணுமா manual-ஆ override பண்ணலாம்</div>
+          <table class="owner-table" id="feeTable">
+            <thead><tr><th>Category</th><th>Urban Rate (₹)</th><th>Rural Rate (₹)</th></tr></thead>
+            <tbody id="feeTableBody"></tbody>
+          </table>
+          <button class="btn-primary" style="margin-top:12px" data-act="saveFeeTable">Update Fee Schedule</button>
+          <div style="font-size:11.5px;color:var(--green);margin-top:8px;font-weight:600" id="feeTableNote"></div>
+
+          <h4>Owner Payment Details / UPI &amp; Bank Account</h4>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Owners &amp; Builders இந்த UPI ID அல்லது Bank Account-க்கு Registration Fee செலுத்துவார்கள்</div>
+          <div class="form-grid">
+            <div><label>UPI ID</label><input id="payUpi" value="rentalbhk@upi"></div>
+            <div><label>Account Holder Name</label><input id="payAccName" value="RentalBHK Pvt Ltd"></div>
+            <div><label>Account Number</label><input id="payAccNo" value="123456789012"></div>
+            <div><label>IFSC Code</label><input id="payIfsc" value="HDFC0001234"></div>
+            <div><label>Bank &amp; Branch</label><input id="payBank" value="HDFC Bank, Anna Nagar"></div>
+          </div>
+          <button class="btn-primary" style="margin-top:10px" data-act="savePaymentSettings">Update Payment Details</button>
+          <div style="font-size:11.5px;color:var(--green);margin-top:8px;font-weight:600" id="paymentSettingsNote"></div>
+
+          <h4>Online Rental Agreement Fee</h4>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:8px">ஆன்லைன் agreement போட Owner &amp; Tenant தனித்தனியா செலுத்த வேண்டிய தொகை (per person)</div>
+          <div class="form-grid">
+            <div><label>தொகை (₹ per person)</label><input id="agreeFeeInput" value="99"></div>
+          </div>
+          <button class="btn-primary" style="margin-top:10px" data-act="saveAgreementFee">Update Agreement Fee</button>
+          <div style="font-size:11.5px;color:var(--green);margin-top:8px;font-weight:600" id="agreementFeeNote"></div>
+
+          <h4>புதிய Owner-களுக்கு தொடக்க சலுகை / New Owner Welcome Offer</h4>
+          <div class="toggle-row" style="border-top:none">
+            <div><div class="t-label">Welcome offer active</div><div class="t-sub">புதிய owners-க்கு தொடக்க மாதங்களுக்கு சலுகை</div></div>
+            <div class="switch on" id="welcomeToggle" data-act="toggleOnThenWelcome"></div>
+          </div>
+          <div class="form-grid" style="margin-top:10px">
+            <div><label>எத்தனை மாதம்</label><input id="welcomeMonths" value="3"></div>
+            <div><label>தள்ளுபடி %</label><input id="welcomeDiscount" value="100"></div>
+          </div>
+          <button class="btn-primary" style="margin-top:10px" data-act="saveWelcomeOffer">Save Offer</button>
+          <div style="font-size:11.5px;color:var(--green);margin-top:8px;font-weight:600" id="welcomeNote"></div>
+
+          <h4>பரிந்துரை திட்டம் / Referral Program</h4>
+          <div class="toggle-row" style="border-top:none">
+            <div><div class="t-label">Referral program active</div><div class="t-sub">ஒரு owner-ஐ பரிந்துரைத்தால் இருவருக்கும் சலுகை</div></div>
+            <div class="switch on" id="referralToggle" data-act="toggleOnThenReferral"></div>
+          </div>
+          <div class="form-grid" style="margin-top:10px">
+            <div><label>பரிந்துரைப்பவருக்கு (₹)</label><input id="referrerReward" value="200"></div>
+            <div><label>புதிய owner-க்கு (மாதம் இலவசம்)</label><input id="referredMonths" value="1"></div>
+          </div>
+          <button class="btn-primary" style="margin-top:10px" data-act="saveReferralOffer">Save Referral Program</button>
+          <div style="font-size:11.5px;color:var(--green);margin-top:8px;font-weight:600" id="referralNote"></div>
+        </div>
+
+        <div class="section-head"><h2>Admin Management</h2><span class="hint" style="color:var(--blue);font-weight:600;cursor:pointer" data-act="scrollToId" data-arg="createAdminForm">+ Create admin</span></div>
+        <div id="adminListWrap"></div>
+        <div class="create-admin" id="createAdminForm" style="margin-top:14px">
+          <h3 style="margin:0 0 12px;font-size:14px">Create / Assign Admin</h3>
+          <div class="form-grid">
+            <div><label>Full name</label><input placeholder="e.g. Deepa Suresh"></div>
+            <div><label>Email</label><input placeholder="deepa@rentalbhk.co.in"></div>
+            <div><label>Role</label><select><option>District Admin</option><option>State Admin</option></select></div>
+            <div><label>Assign to</label><select><option>Chennai</option><option>Coimbatore</option><option>Madurai</option><option>Trichy</option></select></div>
+          </div>
+          <button class="btn-primary" style="margin-top:12px" data-act="doAlert" data-arg="Admin invite sent.">Create Admin</button>
+        </div>
+        <div class="section-head"><h2>Final Property &amp; Project Approvals</h2><span class="hint">Passed AI + Admin review</span></div>
+        <div id="finalApprovalWrap"></div>
+        <div class="section-head"><h2>Flagged / Fake Accounts</h2><span class="hint">Auto-detected + reported</span></div>
+        <div id="flaggedWrap"></div>
+      </div>
+      <div>
+        <div class="section-head" style="margin-top:0"><h2>Broadcast Notification</h2><span class="hint"></span></div>
+        <div class="add-form broadcast-box">
+          <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Message</label>
+          <textarea placeholder="e.g. Scheduled maintenance tonight 11 PM–1 AM."></textarea>
+          <div class="form-grid" style="margin-top:10px">
+            <div><label>Audience</label><select><option>All users</option><option>Owners only</option><option>Builders only</option><option>Customers only</option><option>Admins only</option></select></div>
+          </div>
+          <button class="btn-primary" style="margin-top:12px;width:100%" data-act="doAlert" data-arg="Broadcast sent.">Send Broadcast</button>
+        </div>
+        <div class="section-head"><h2>App Settings</h2><span class="hint"></span></div>
+        <div class="add-form" style="padding:6px 18px 4px">
+          <div class="toggle-row"><div><div class="t-label">New owner registrations</div><div class="t-sub">Allow new owners to sign up</div></div><div class="switch on" data-act="toggleOn"></div></div>
+          <div class="toggle-row"><div><div class="t-label">Auto-approve verified owners</div><div class="t-sub">Skip manual review for repeat owners</div></div><div class="switch" data-act="toggleOn"></div></div>
+          <div class="toggle-row"><div><div class="t-label">Maintenance mode</div><div class="t-sub">Take the app offline for users</div></div><div class="switch" data-act="toggleOn"></div></div>
+          <div class="toggle-row"><div><div class="t-label">Advertisement slots</div><div class="t-sub">Show sponsored listings on search</div></div><div class="switch on" data-act="toggleOn"></div></div>
+        </div>
+
+        <div class="section-head"><h2>Advertisement Management</h2><span class="hint">Local service ads (revenue)</span></div>
+        <div id="adsListWrap"></div>
+        <div class="add-form" style="margin-top:10px">
+          <h4 style="margin:0 0 12px;font-size:14px">Add New Ad</h4>
+          <div class="form-grid">
+            <div><label>வணிக பெயர் (Business Name)</label><input id="ad-name" placeholder="e.g. Sri Balaji Painters"></div>
+            <div><label>Category</label><select id="ad-category">
+              <option value="Painting">🎨 Painting</option>
+              <option value="Plumbing">🔧 Plumbing</option>
+              <option value="Cleaning">🧹 Cleaning</option>
+              <option value="Electric">⚡ Electric</option>
+              <option value="Electronics">📺 Electronics</option>
+            </select></div>
+            <div><label>Tagline</label><input id="ad-tag" placeholder="e.g. Free estimate, 24/7 service"></div>
+            <div><label>Phone</label><input id="ad-phone" placeholder="98765 43210"></div>
+          </div>
+          <button class="btn-primary" style="margin-top:10px" data-act="addAd">+ Add Ad</button>
+        </div>
+        <div class="section-head"><h2>Logo &amp; Banner</h2><span class="hint">Current logo</span></div>
+        <div class="add-form" style="padding:14px;display:flex;align-items:center;gap:12px">
+          <img src="data:image/png;base64,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" alt="RentalBHK logo" style="width:52px;height:52px;border-radius:12px;object-fit:cover;flex-shrink:0">
+          <div style="font-size:12px;color:var(--muted)">rentalbhk-logo.png · 1024×1024 · uploaded ✓</div>
+        </div>
+        <div class="upload-box" style="margin-top:10px">🖼️ Upload a new logo, favicon or homepage banner to replace this</div>
+        <div class="section-head"><h2>Database</h2><span class="hint"></span></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-ghost" style="flex:1" data-act="doAlert" data-arg="Backup started.">Backup Now</button>
+          <button class="btn-ghost" style="flex:1" data-act="doAlert" data-arg="Restore requires a backup file.">Restore</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SETTINGS & FEEDBACK VIEW ============ -->
+  <div class="view" id="view-settings">
+    <div class="section-head" style="margin-top:0"><h2>Settings &amp; Feedback</h2><span class="hint">உங்க கணக்கு</span></div>
+
+    <div class="add-form" style="margin-top:0">
+      <h4 style="margin-top:0">Language &amp; Currency</h4>
+      <div class="form-grid">
+        <div><label>App Language</label><select id="langSelect2" data-onchange="syncLangFromSettings"><option value="ta">தமிழ்</option><option value="en">English</option></select></div>
+        <div><label>Currency</label><select id="currSelect2" data-onchange="syncCurrFromSettings"><option value="INR">₹ INR</option><option value="USD">$ USD</option><option value="GBP">£ GBP</option><option value="AED">AED</option><option value="SGD">S$ SGD</option></select></div>
+      </div>
+      <h4>Notifications</h4>
+      <div class="toggle-row" style="border-top:none"><div><div class="t-label">Chat &amp; enquiry alerts</div></div><div class="switch on" data-act="toggleOn"></div></div>
+      <div class="toggle-row"><div><div class="t-label">New listings near me</div></div><div class="switch on" data-act="toggleOn"></div></div>
+      <div class="toggle-row"><div><div class="t-label">Price drop alerts</div></div><div class="switch" data-act="toggleOn"></div></div>
+    </div>
+
+    <div class="section-head"><h2>App பற்றிய கருத்து / Feedback</h2><span class="hint"></span></div>
+    <div class="add-form">
+      <label style="display:block;font-size:12px;font-weight:600;margin-bottom:6px">Rate the app</label>
+      <div class="star-pick" id="starPick">
+        <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+      </div>
+      <textarea id="fbText" placeholder="உங்க கருத்தை பதிவு செய்யுங்க…" style="width:100%;min-height:70px;border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px;"></textarea>
+      <button class="btn-primary" style="margin-top:10px" data-act="submitFeedback">Submit Feedback</button>
+    </div>
+
+    <div class="section-head"><h2>உங்க முந்தைய கருத்துக்கள்</h2><span class="hint"></span></div>
+    <div id="feedbackList"></div>
+  </div>
+
+</main>
+
+<!-- ============ LOGIN MODAL ============ -->
+<div class="modal-bg" id="loginModal">
+  <div class="modal-box">
+    <button class="modal-close" data-act="closeModal">✕</button>
+    <div id="loginStep1">
+      <h3>உள்நுழைய / Login</h3>
+      <div class="sub">Mobile number மூலம் OTP அனுப்பப்படும்</div>
+      <input type="text" id="phoneInput" placeholder="+91 98765 43210">
+      <button class="btn-primary" data-act="sendOtp">Send OTP</button>
+    </div>
+    <div id="loginStep2" style="display:none">
+      <h3>OTP சரிபார்ப்பு</h3>
+      <div class="sub">SMS-ல் வந்த 4-இலக்க OTP-ஐ உள்ளிடவும் (demo: 1234)</div>
+      <input type="text" id="otpInput" placeholder="1234" maxlength="4">
+      <button class="btn-primary" data-act="verifyOtp">Verify &amp; Continue</button>
+    </div>
+    <div id="loginStep3" style="display:none">
+      <h3>எப்படி தொடர விரும்புகிறீர்கள்?</h3>
+      <div class="sub">பின்னால் எப்போது வேண்டுமானாலும் மாற்றிக்கொள்ளலாம்</div>
+      <div class="role-pick" id="rolePick" style="grid-template-columns:repeat(2,1fr)">
+        <div class="rp on" data-r="customer">Customer</div>
+        <div class="rp" data-r="owner">Owner</div>
+      </div>
+      <button class="btn-primary" data-act="finishLogin">தொடரவும்</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ DOCUMENT VIEWER MODAL (Admin manual check) ============ -->
+<div class="modal-bg" id="docModal">
+  <div class="modal-box doc-modal-box">
+    <button class="modal-close" data-act="closeDocModal">✕</button>
+    <h3 id="docModalTitle">Documents</h3>
+    <div class="sub">Admin manual verification — ஒவ்வொரு ஆவணத்தையும் தொட்டு பாருங்க</div>
+    <div class="doc-thumb-grid" id="docThumbGrid"></div>
+    <div class="doc-preview" id="docPreview">📄<span>ஒரு document-ஐ தேர்வு செய்யவும்</span></div>
+    <table class="field-table" id="docFieldTable"></table>
+    <div class="doc-modal-actions">
+      <button class="btn-primary" style="flex:1" data-act="markManuallyVerified">✓ Admin manually verified</button>
+      <button class="btn-ghost" data-act="closeDocModal">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CHAT MODAL ============ -->
+<div class="modal-bg" id="chatModal">
+  <div class="modal-box chat-modal-box">
+    <button class="modal-close" data-act="closeChatModal">✕</button>
+    <h3 id="chatModalTitle">Chat</h3>
+    <div class="sub" id="chatModalSub"></div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Message type செய்யவும்…">
+      <button data-act="sendChatMessage">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ RENTAL AGREEMENT MODAL ============ -->
+<div class="modal-bg" id="agreementModal">
+  <div class="modal-box agreement-modal-box">
+    <button class="modal-close" data-act="closeAgreementModal">✕</button>
+    <h3 id="agreeModalTitle">Rental Agreement</h3>
+    <div class="sub" id="agreeModalSub"></div>
+
+    <h4 style="margin:14px 0 8px;font-size:13px">1. ஒப்பந்த விவரங்கள் / Agreement Details</h4>
+    <div class="form-grid">
+      <div><label>Tenant பெயர்</label><input id="agree-tenant-name" placeholder="உங்க பெயர்"></div>
+      <div><label>Owner பெயர்</label><input id="agree-owner-name" readonly></div>
+      <div><label>தொடங்கும் தேதி</label><input id="agree-start-date" type="date"></div>
+      <div><label>காலம் (மாதங்கள்)</label><input id="agree-duration" value="11"></div>
+      <div><label>மாத வாடகை (₹)</label><input id="agree-rent" readonly></div>
+      <div><label>அட்வான்ஸ் / Deposit (₹)</label><input id="agree-deposit" placeholder="e.g. 54000"></div>
+      <div><label>Notice Period (மாதங்கள்)</label><input id="agree-notice" value="1"></div>
+    </div>
+    <div style="margin-top:8px"><label style="display:block;font-size:12px;font-weight:600;margin-bottom:5px">கூடுதல் நிபந்தனைகள் (விருப்பம்)</label>
+      <textarea id="agree-terms" placeholder="எ.கா: Pet allowed இல்லை, Maintenance tenant பொறுப்பு…" style="width:100%;min-height:56px;border:1px solid var(--line);border-radius:8px;padding:8px;font-size:12.5px;"></textarea>
+    </div>
+
+    <h4 style="margin:16px 0 8px;font-size:13px">2. செலுத்தும் முறை / Payment Type</h4>
+    <div class="type-toggle" id="agreeTypeToggle">
+      <button class="on" data-act="setAgreementType" data-arg="offline">ஆஃப்லைன் / Offline</button>
+      <button data-act="setAgreementType" data-arg="online">ஆன்லைன் / Online</button>
+    </div>
+
+    <div id="agreeOfflinePanel" style="margin-top:14px">
+      <div style="font-size:12.5px;color:var(--navy)">ஆஃப்லைனில் agreement போடுவதற்கு <b>எவ்வித கட்டணமும் இல்லை</b> — Owner &amp; Tenant இருவரும் நேரில் சந்தித்து, agreement-ல் கையொப்பமிடலாம்.</div>
+      <button class="btn-primary" style="margin-top:8px;width:100%" data-act="markOfflineAgreementDone">✓ விவரங்களை உறுதி செய்து Agreement உருவாக்கு</button>
+      <div id="agreeOfflineStatus" style="font-size:11.5px;color:var(--green);margin-top:8px;font-weight:600"></div>
+    </div>
+
+    <div id="agreeOnlinePanel" style="display:none;margin-top:14px">
+      <div style="font-size:12.5px;color:var(--navy)">ஆன்லைன் மூலம் agreement போட, <b>Owner &amp; Tenant இருவரும்</b> கட்டணம் செலுத்த வேண்டும். இருவரும் செலுத்தியதும் Agreement Document &amp; Receipt அவரவர் <b>Phone (SMS) &amp; Email</b>-க்கு அனுப்பப்படும்.</div>
+      <div style="font-size:20px;font-weight:700;font-family:'Space Grotesk';color:var(--blue-dark);margin-top:8px" id="agreeFeeAmount">₹99 <span style="font-size:11px;color:var(--muted);font-weight:400">per person</span></div>
+
+      <div class="agree-pay-row">
+        <div class="who">👤 Tenant (நீங்கள்) Payment</div>
+        <div id="agreeCustPayWrap"></div>
+      </div>
+      <div class="agree-pay-row">
+        <div class="who">🏠 Owner Payment</div>
+        <div id="agreeOwnerPayWrap"></div>
+      </div>
+    </div>
+
+    <div id="agreeSuccessBox" style="display:none"></div>
+    <div id="agreeDocWrap"></div>
+  </div>
+</div>
+
+<script>
+/* ================= MOCK DATA ================= */
+const localAds = [
+  {icon:'🎨',category:'Painting',name:'Sri Balaji Painters',tag:'Home &amp; Office Painting · Free estimate',phone:'98765 43210'},
+  {icon:'🔧',category:'Plumbing',name:'Quick Fix Plumbers',tag:'24/7 Plumbing Service',phone:'90000 11223'},
+  {icon:'🧹',category:'Cleaning',name:'Sparkle Home Cleaning',tag:'Deep Cleaning · Move-in/out',phone:'93456 78901'},
+  {icon:'⚡',category:'Electric',name:'PowerOn Electricians',tag:'Wiring, Repairs &amp; Installations',phone:'99887 66554'},
+  {icon:'📺',category:'Electronics',name:'TechCare Electronics',tag:'AC, TV, Fridge Repair Service',phone:'91234 56789'},
+];
+const properties = [
+  {id:1,title:"Sunrise Residency",city:"Chennai",area:"Anna Nagar",pincode:"600040",areaType:"metro",category:"house",listingType:"rent",bhk:2,price:18000,parking:true,pref:"family",verified:true,rating:4.5,reviews:12,owner:"Ramesh Kumar",phone:"98765 XXXXX",address:"12/4, Anna Nagar 2nd Ave, Chennai"},
+  {id:2,title:"Green Park Homes",city:"Chennai",area:"Velachery",pincode:"600042",areaType:"metro",category:"house",listingType:"rent",bhk:1,price:11000,parking:false,pref:"bachelor",verified:true,rating:4.1,reviews:7,owner:"Lakshmi N",phone:"90000 XXXXX",address:"7A, Velachery Main Rd, Chennai"},
+  {id:3,title:"Lakeview Villa",city:"Coimbatore",area:"RS Puram",pincode:"641002",areaType:"city",category:"house",listingType:"sale",bhk:3,price:8500000,parking:true,pref:"family",verified:true,rating:4.8,reviews:20,owner:"Ganesh Babu",phone:"93456 XXXXX",address:"22, RS Puram 3rd St, Coimbatore"},
+  {id:4,title:"Palm Residency",city:"Madurai",area:"KK Nagar",pincode:"625020",areaType:"city",category:"house",listingType:"rent",bhk:2,price:14000,parking:true,pref:"pet",verified:false,rating:3.9,reviews:4,owner:"Meena R",phone:"99887 XXXXX",address:"5, KK Nagar West, Madurai"},
+  {id:5,title:"Skyline Towers",city:"Trichy",area:"Thillai Nagar",pincode:"620018",areaType:"city",category:"house",listingType:"rent",bhk:4,price:35000,parking:true,pref:"family",verified:true,rating:4.3,reviews:9,owner:"Arun Prakash",phone:"91234 XXXXX",address:"18, Thillai Nagar, Trichy"},
+  {id:6,title:"Cozy Nest Studio",city:"Chennai",area:"T Nagar",pincode:"600017",areaType:"metro",category:"house",listingType:"rent",bhk:1,price:13500,parking:false,pref:"bachelor",verified:true,rating:4.0,reviews:15,owner:"Divya S",phone:"90123 XXXXX",address:"3, Usman Road, T Nagar, Chennai"},
+  {id:7,title:"Anna Salai Vacant Plot",city:"Chennai",area:"Guindy",pincode:"600032",areaType:"metro",category:"land",listingType:"sale",bhk:null,price:12000000,parking:false,pref:"",verified:true,rating:4.6,reviews:5,owner:"Selvam P",phone:"98111 XXXXX",address:"Plot 14, Guindy Industrial Estate Rd, Chennai",sqft:2400},
+  {id:8,title:"Perumbakkam Open Ground",city:"Chennai",area:"Perumbakkam",pincode:"600100",areaType:"town",category:"ground",listingType:"rent",bhk:null,price:8000,parking:true,pref:"",verified:true,rating:4.2,reviews:8,owner:"Village Panchayat Trust",phone:"90111 XXXXX",address:"Perumbakkam Main Rd, near bus stand",sqft:15000},
+  {id:9,title:"Sri Meenakshi Marriage Hall",city:"Madurai",area:"Simmakkal",pincode:"625001",areaType:"city",category:"hall",listingType:"rent",bhk:null,price:45000,parking:true,pref:"",verified:true,rating:4.7,reviews:31,owner:"Muthu Kalyana Mandapam Trust",phone:"94422 XXXXX",address:"Simmakkal Main Rd, Madurai",sqft:8000},
+  {id:10,title:"Gandhi Road Shop Space",city:"Coimbatore",area:"Town Hall",pincode:"641001",areaType:"city",category:"shop",listingType:"rent",bhk:null,price:22000,parking:false,pref:"",verified:true,rating:4.0,reviews:6,owner:"Rajendran & Sons",phone:"96789 XXXXX",address:"Gandhi Road, Town Hall, Coimbatore",sqft:600},
+  {id:11,title:"Vellalur Farmland",city:"Coimbatore",area:"Vellalur",pincode:"641111",areaType:"village",category:"land",listingType:"sale",bhk:null,price:3200000,parking:false,pref:"",verified:false,rating:4.1,reviews:2,owner:"Karuppasamy M",phone:"97001 XXXXX",address:"Survey No. 214, Vellalur Village",sqft:21780},
+  {id:12,title:"Thillai Nagar Retail Shop",city:"Trichy",area:"Thillai Nagar",pincode:"620018",areaType:"city",category:"shop",listingType:"sale",bhk:null,price:6800000,parking:true,pref:"",verified:true,rating:4.4,reviews:11,owner:"Balaji Traders",phone:"98456 XXXXX",address:"Main Bazaar, Thillai Nagar, Trichy",sqft:850},
+  {id:13,title:"Balaji Green Meadows",city:"Chennai",area:"Sholinganallur",pincode:"600119",areaType:"metro",category:"builder",listingType:"sale",bhk:null,price:4500000,parking:true,pref:"",verified:true,rating:4.5,reviews:18,owner:"Sri Balaji Builders",phone:"90555 XXXXX",address:"OMR, Sholinganallur, Chennai",sqft:1150},
+];
+
+const ownerProps = [
+  {title:"Sunrise Residency, Anna Nagar",type:"House/Flat · Rent",price:18000,unit:"rent",stage:"live"},
+  {title:"Cozy Nest Studio, T Nagar",type:"House/Flat · Rent",price:13500,unit:"rent",stage:"live"},
+  {title:"Hilltop Flat, Perungudi",type:"House/Flat · Rent",price:16000,unit:"rent",stage:"admin"},
+  {title:"OMR Vacant Plot, Sholinganallur",type:"Land · Sale",price:9500000,unit:"sale",stage:"ai"},
+  {title:"Community Ground, Tambaram",type:"Ground · Rent",price:6000,unit:"rent",stage:"super"},
+  {title:"Garden View, Adyar",type:"House/Flat · Rent",price:24000,unit:"rent",stage:"rejected"},
+];
+
+const builderProps = [
+  {title:"Balaji Green Meadows, Sholinganallur",units:"96 (2/3 BHK)",price:"₹45L – 85L",stage:"live"},
+  {title:"Balaji Riverside, Porur",units:"54 (1/2 BHK)",price:"₹32L – 58L",stage:"admin"},
+  {title:"Balaji Heights, Tambaram",units:"120 (2/3/4 BHK)",price:"₹55L – 1.2Cr",stage:"ai"},
+];
+
+const kycQueue = [
+  {name:"Suresh Babu (Owner)",sub:"Aadhaar · Property Tax Bill · Selfie Match",time:"2h ago",ai:94,
+    docs:[{icon:'🪪',label:'Aadhaar Card'},{icon:'🧾',label:'Property Tax Bill'},{icon:'🤳',label:'Selfie'}],
+    fields:[{label:'Name',entered:'Suresh Babu',detected:'Suresh Babu',match:true},{label:'Aadhaar No.',entered:'XXXX XXXX 4521',detected:'XXXX XXXX 4521',match:true},{label:'Selfie face match',entered:'—',detected:'96% match',match:true}]},
+  {name:"Priya Raman (Owner)",sub:"Aadhaar · Patta · EB Bill · Selfie Match",time:"5h ago",ai:89,
+    docs:[{icon:'🪪',label:'Aadhaar Card'},{icon:'📜',label:'Patta'},{icon:'⚡',label:'EB Bill'},{icon:'🤳',label:'Selfie'}],
+    fields:[{label:'Name',entered:'Priya Raman',detected:'Priya Raman',match:true},{label:'Aadhaar No.',entered:'XXXX XXXX 7719',detected:'XXXX XXXX 7719',match:true},{label:'Selfie face match',entered:'—',detected:'91% match',match:true}]},
+  {name:"Manikandan S (Owner)",sub:"Aadhaar · Property Tax Bill · Selfie",time:"1d ago",ai:71,
+    docs:[{icon:'🪪',label:'Aadhaar Card'},{icon:'🧾',label:'Property Tax Bill'},{icon:'🤳',label:'Selfie'}],
+    fields:[{label:'Name',entered:'Manikandan S',detected:'Manikandan Selvam',match:false},{label:'Aadhaar No.',entered:'XXXX XXXX 2290',detected:'XXXX XXXX 2290',match:true},{label:'Selfie face match',entered:'—',detected:'68% match',match:false}]},
+];
+const custKycQueue = [
+  {name:"Anjali M (Customer)",sub:"Aadhaar · Mobile OTP ✓ · Email ✓ · Selfie Match",time:"1h ago",ai:96,
+    docs:[{icon:'🪪',label:'Aadhaar Card'},{icon:'🤳',label:'Selfie'}],
+    fields:[{label:'Name',entered:'Anjali M',detected:'Anjali Murugan',match:true},{label:'Mobile OTP',entered:'Verified',detected:'Verified',match:true},{label:'Selfie face match',entered:'—',detected:'97% match',match:true}]},
+  {name:"Rahul K (Customer)",sub:"Aadhaar · Mobile OTP ✓ · Selfie Match",time:"3h ago",ai:85,
+    docs:[{icon:'🪪',label:'Aadhaar Card'},{icon:'🤳',label:'Selfie'}],
+    fields:[{label:'Name',entered:'Rahul K',detected:'Rahul Kannan',match:true},{label:'Mobile OTP',entered:'Verified',detected:'Verified',match:true},{label:'Selfie face match',entered:'—',detected:'88% match',match:true}]},
+  {name:"Divya T (Customer)",sub:"Aadhaar · Mobile OTP ✓ · Selfie mismatch flagged",time:"6h ago",ai:58,
+    docs:[{icon:'🪪',label:'Aadhaar Card'},{icon:'🤳',label:'Selfie'}],
+    fields:[{label:'Name',entered:'Divya T',detected:'Divya Thangaraj',match:true},{label:'Mobile OTP',entered:'Verified',detected:'Verified',match:true},{label:'Selfie face match',entered:'—',detected:'52% match',match:false}]},
+];
+const propQueue = [
+  {name:"Palm Residency — Madurai, KK Nagar",sub:"House/Flat · Tax Receipt · Patta · EB Bill · EC · 8 photos",time:"3h ago",ai:91,
+    payment:{status:'paid',amount:150,utr:'402812345678'},
+    docs:[{icon:'📜',label:'Patta'},{icon:'⚡',label:'EB Bill'},{icon:'🧾',label:'Tax Receipt'},{icon:'🔎',label:'EC'},{icon:'📷',label:'8 Photos'}],
+    fields:[{label:'Patta No.',entered:'1123',detected:'1123',match:true},{label:'Survey No.',entered:'214/2B',detected:'214/2B',match:true},{label:'EB Service No.',entered:'123-456-789',detected:'123-456-789',match:true},{label:'EC No.',entered:'2024/EC/000456',detected:'2024/EC/000456',match:true},{label:'GPS location',entered:'Captured',detected:'Matches address',match:true}]},
+  {name:"OMR Vacant Plot — Sholinganallur",sub:"Land · Patta · Sale Deed · EC · GPS confirmed",time:"4h ago",ai:88,
+    payment:{status:'paid',amount:120,utr:'402809988771'},
+    docs:[{icon:'📜',label:'Patta'},{icon:'📝',label:'Sale Deed'},{icon:'🔎',label:'EC'}],
+    fields:[{label:'Patta No.',entered:'4521',detected:'4521',match:true},{label:'Survey No.',entered:'88/1',detected:'88/1',match:true},{label:'EC No.',entered:'2023/EC/009812',detected:'2023/EC/009812',match:true},{label:'GPS location',entered:'Captured',detected:'Matches address',match:true}]},
+  {name:"Community Ground — Tambaram",sub:"Ground · Panchayat NOC · Tax Receipt",time:"5h ago",ai:76,
+    payment:{status:'pending',amount:80,utr:'402855501122'},
+    docs:[{icon:'🏛️',label:'Panchayat NOC'},{icon:'🧾',label:'Tax Receipt'}],
+    fields:[{label:'Owner name',entered:'Village Panchayat Trust',detected:'Panchayat Trust',match:true},{label:'Tax Assessment No.',entered:'—',detected:'Partially legible',match:false}]},
+  {name:"Hilltop Flat — Perungudi",sub:"House/Flat · Tax Receipt · Photos · GPS pending · EC missing",time:"6h ago",ai:64,
+    payment:{status:'not_submitted',amount:150,utr:null},
+    docs:[{icon:'🧾',label:'Tax Receipt'},{icon:'📷',label:'Photos'}],
+    fields:[{label:'Patta No.',entered:'—',detected:'Not uploaded',match:false},{label:'EC No.',entered:'—',detected:'Not uploaded',match:false},{label:'GPS location',entered:'Not captured',detected:'—',match:false}]},
+];
+const projQueue = [
+  {name:"Balaji Heights — Tambaram",sub:"RERA Cert · Land Title · Approved Plan · GPS confirmed",time:"2h ago",ai:90,
+    payment:{status:'paid',amount:150,utr:'402877712233'},
+    docs:[{icon:'🏛️',label:'RERA Cert'},{icon:'📜',label:'Land Title'},{icon:'📐',label:'Approved Plan'}],
+    fields:[{label:'RERA No.',entered:'TN/RERA/2024/0456',detected:'TN/RERA/2024/0456',match:true},{label:'Survey No.',entered:'88/1',detected:'88/1',match:true},{label:'GPS location',entered:'Captured',detected:'Matches address',match:true}]},
+  {name:"Balaji Riverside — Porur",sub:"RERA Cert · Land Title · Plan pending review",time:"1d ago",ai:72,
+    payment:{status:'not_submitted',amount:150,utr:null},
+    docs:[{icon:'🏛️',label:'RERA Cert'},{icon:'📜',label:'Land Title'}],
+    fields:[{label:'RERA No.',entered:'TN/RERA/2024/0311',detected:'TN/RERA/2024/0311',match:true},{label:'Approved Plan',entered:'—',detected:'Not uploaded',match:false}]},
+];
+const complaints = [
+  {text:"Tenant reports owner not responding after deposit paid — Skyline Towers.",meta:"Filed by Anjali M. · 1 day ago · Open"},
+  {text:"Duplicate listing suspected for Green Park Homes.",meta:"Flagged by system · 2 days ago · Under review"},
+];
+const districtStats = [{name:"Chennai",num:412},{name:"Coimbatore",num:187},{name:"Madurai",num:96},{name:"Trichy",num:64}];
+const revenueMonths = [{m:"Apr",v:62},{m:"May",v:74},{m:"Jun",v:58},{m:"Jul",v:81},{m:"Aug",v:95},{m:"Sep",v:100}];
+const adminList = [
+  {name:"Deepa Suresh",sub:"District Admin · Chennai"},{name:"Karthik R",sub:"District Admin · Coimbatore"},
+  {name:"Fathima N",sub:"State Admin · Tamil Nadu"},{name:"Vignesh M",sub:"District Admin · Madurai"},
+];
+const flaggedAccounts = [
+  {name:"user_8827 (Owner)",sub:"3 duplicate listings detected · reported twice"},
+  {name:"user_4410 (Customer)",sub:"Suspicious chat activity flagged by system"},
+];
+const finalApprovals = [
+  {name:"Sri Meenakshi Marriage Hall — Madurai",sub:"Marriage Hall · AI 95% · Admin approved by Deepa Suresh",time:"1h ago"},
+  {name:"Vellalur Farmland — Coimbatore",sub:"Land · AI 88% · Admin approved by Karthik R",time:"3h ago"},
+  {name:"Balaji Heights — Tambaram (Project)",sub:"Builder Project · AI 90% · Admin approved by Vignesh M",time:"2h ago"},
+];
+let feedbackList = [
+  {stars:5,text:"App ரொம்ப useful-ஆ இருக்கு, verified listings மட்டும் காட்றது நல்லா இருக்கு.",reply:"நன்றி! உங்க feedback-க்கு மிக்க நன்றி — RentalBHK Team"},
+  {stars:4,text:"Video verification option மேலும் owner-களுக்கு எளிதா இருக்கணும்.",reply:"உங்க suggestion note பண்ணிட்டோம், அடுத்த update-ல improve பண்றோம் — RentalBHK Team"},
+];
+
+/* ================= GLOBAL STATE ================= */
+let isLoggedIn = false;
+let selectedStars = 0;
+const catLabels = {house:'வீடு/பிளாட்',land:'காலி இடம்',ground:'மைதானம்',hall:'மண்டபம்',shop:'கடை',builder:'புது Project'};
+const areaLabels = {village:'கிராமம்',town:'நகரம்',city:'பெருநகரம்',metro:'Metro City'};
+const currRates = {INR:{sym:'₹',rate:1},USD:{sym:'$',rate:0.012},GBP:{sym:'£',rate:0.0095},AED:{sym:'AED ',rate:0.044},SGD:{sym:'S$',rate:0.016}};
+
+/* ================= PIN CODE → AREA LOOKUP (demo/offline DB) ================= */
+/* Real app: replace with India Post PIN Code API. Covering demo PIN codes + a few common ones. */
+const PIN_DB = {
+  '600040':{state:'Tamil Nadu',district:'Chennai',taluk:'Egmore',village:'Anna Nagar',city:'Chennai',areaType:'metro'},
+  '600042':{state:'Tamil Nadu',district:'Chennai',taluk:'Velachery',village:'Velachery',city:'Chennai',areaType:'metro'},
+  '600017':{state:'Tamil Nadu',district:'Chennai',taluk:'Mambalam',village:'T Nagar',city:'Chennai',areaType:'metro'},
+  '600032':{state:'Tamil Nadu',district:'Chennai',taluk:'Guindy',village:'Guindy',city:'Chennai',areaType:'metro'},
+  '600100':{state:'Tamil Nadu',district:'Chennai',taluk:'Sholinganallur',village:'Perumbakkam',city:'Chennai',areaType:'town'},
+  '600119':{state:'Tamil Nadu',district:'Chennai',taluk:'Sholinganallur',village:'Sholinganallur',city:'Chennai',areaType:'metro'},
+  '641002':{state:'Tamil Nadu',district:'Coimbatore',taluk:'Coimbatore North',village:'RS Puram',city:'Coimbatore',areaType:'city'},
+  '641001':{state:'Tamil Nadu',district:'Coimbatore',taluk:'Coimbatore North',village:'Town Hall',city:'Coimbatore',areaType:'city'},
+  '641111':{state:'Tamil Nadu',district:'Coimbatore',taluk:'Sulur',village:'Vellalur',city:'Coimbatore',areaType:'village'},
+  '625020':{state:'Tamil Nadu',district:'Madurai',taluk:'Madurai North',village:'KK Nagar',city:'Madurai',areaType:'city'},
+  '625001':{state:'Tamil Nadu',district:'Madurai',taluk:'Madurai East',village:'Simmakkal',city:'Madurai',areaType:'city'},
+  '620018':{state:'Tamil Nadu',district:'Tiruchirappalli',taluk:'Trichy',village:'Thillai Nagar',city:'Trichy',areaType:'city'},
+};
+function autoFillFromPincode(pin, mode){
+  pin = (pin||'').trim();
+  const hintId = mode==='customer' ? 'f-pincode-hint' : (mode==='owner' ? 'np-pincode-hint' : 'bp-pincode-hint');
+  const hint = document.getElementById(hintId);
+  if(pin.length!==6){ if(hint) hint.style.display='none'; return; }
+  const rec = PIN_DB[pin];
+  if(!rec){
+    if(hint){ hint.style.display='block'; hint.style.color='var(--amber)'; hint.textContent='இந்த PIN database-ல இல்லை — மாநிலம்/மாவட்டம்/ஏரியா-ஐ கைமுறையா பூர்த்தி செய்யவும்.'; }
+    return;
+  }
+  if(hint){ hint.style.display='block'; hint.style.color='var(--green)'; hint.textContent='✓ '+rec.village+', '+rec.district+', '+rec.state+' — தானாக நிரப்பப்பட்டது'; }
+
+  if(mode==='customer'){
+    const citySel = document.getElementById('f-city');
+    if([...citySel.options].some(o=>o.value===rec.city)) citySel.value = rec.city;
+    document.getElementById('f-areatype').value = rec.areaType;
+  } else if(mode==='owner'){
+    document.getElementById('np-state').value = rec.state;
+    document.getElementById('np-district').value = rec.district;
+    document.getElementById('np-taluk').value = rec.taluk;
+    document.getElementById('np-village').value = rec.village;
+    document.getElementById('np-areatype').value = rec.areaType;
+    document.getElementById('np-cityarea').value = rec.village+', '+rec.city;
+  } else if(mode==='builder'){
+    document.getElementById('bp-state').value = rec.state;
+    document.getElementById('bp-district').value = rec.district;
+    document.getElementById('bp-taluk').value = rec.taluk;
+    document.getElementById('bp-village').value = rec.village;
+    document.getElementById('bp-cityarea').value = rec.village+', '+rec.city;
+  }
+}
+
+function fmtPrice(inrValue, isSaleTotal){
+  const cur = currRates[document.getElementById('currSelect').value];
+  const v = inrValue*cur.rate;
+  if(cur.rate!==1){
+    return cur.sym+(v>=1000?v.toLocaleString('en-US',{maximumFractionDigits:0}):v.toFixed(1));
+  }
+  if(isSaleTotal) return cur.sym+(inrValue/100000).toFixed(1)+' L';
+  return cur.sym+inrValue.toLocaleString('en-IN');
+}
+
+/* ================= LANGUAGE (demo) ================= */
+const T = {
+  ta:{customer:'Customer',owner:'Owner',admin:'Admin',superadmin:'Super Admin',search:'ஊர், ஏரியா அல்லது PIN கோடு தேடுங்கள்…',filters:'Filters'},
+  en:{customer:'Customer',owner:'Owner',admin:'Admin',superadmin:'Super Admin',search:'Search by city, area or PIN code…',filters:'Filters'}
+};
+function applyLanguage(){
+  const lang = document.getElementById('langSelect').value;
+  document.getElementById('langSelect2').value = lang;
+  const t = T[lang];
+  document.querySelectorAll('#roleSwitch button')[0].textContent = t.customer;
+  document.querySelectorAll('#roleSwitch button')[1].textContent = t.owner;
+  document.querySelectorAll('#roleSwitch button')[2].textContent = t.admin;
+  document.querySelectorAll('#roleSwitch button')[3].textContent = t.superadmin;
+  document.getElementById('searchBox').placeholder = t.search;
+  document.querySelector('.filters h3').textContent = t.filters;
+}
+
+/* ================= EVENT DELEGATION (works even where inline attrs are blocked) ================= */
+document.addEventListener('click', function(e){
+  const el = e.target.closest('[data-act]');
+  if(!el) return;
+  const fn = window[el.dataset.act];
+  if(typeof fn === 'function') fn(el.dataset.arg, el.dataset.arg2, el, e);
+});
+document.addEventListener('input', function(e){
+  const el = e.target.closest('[data-oninput]');
+  if(!el) return;
+  const fn = window[el.dataset.oninput];
+  if(typeof fn === 'function') fn(el.value, el.dataset.arg2, el, e);
+});
+document.addEventListener('change', function(e){
+  const el = e.target.closest('[data-onchange]');
+  if(!el) return;
+  const fn = window[el.dataset.onchange];
+  if(typeof fn === 'function') fn(el.value, el.dataset.arg2, el, e);
+});
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter' && e.target && e.target.id==='chatInput'){ sendChatMessage(); }
+});
+
+/* ---- Small adapter/helper actions used by the delegated dispatcher above ---- */
+function toggleOn(a1,a2,el){ if(el) el.classList.toggle('on'); }
+function toggleOnThenWelcome(a1,a2,el){ if(el) el.classList.toggle('on'); saveWelcomeOffer(); }
+function toggleOnThenReferral(a1,a2,el){ if(el) el.classList.toggle('on'); saveReferralOffer(); }
+function finishVerifyItem(msg,a2,el){ const item=el && el.closest('.verify-item'); if(item){ item.style.opacity=.4; item.innerHTML=msg; } }
+function finishFlaggedItem(msg,a2,el){ const item=el && el.closest('.flagged-item'); if(item){ item.style.opacity=.4; item.innerHTML=msg; } }
+function removeAdminListItem(a1,a2,el){ const item=el && el.closest('.admin-list-item'); if(item) item.remove(); }
+function closeDetailPanel(){ const p=document.getElementById('detailPanel'); if(p) p.classList.remove('open'); }
+function scrollToId(id){ const el=document.getElementById(id); if(el) el.scrollIntoView({behavior:'smooth'}); }
+function showAiStepperB(){ const el=document.getElementById('aiVerifyStepperB'); if(el) el.style.display='block'; }
+function stopProp(a1,a2,el,e){ if(e) e.stopPropagation(); }
+function doAlert(msg){ alert(msg); }
+function syncLangFromSettings(val){ document.getElementById('langSelect').value=val; applyLanguage(); }
+function syncCurrFromSettings(val){ document.getElementById('currSelect').value=val; renderAll(); }
+function mapsClickHandler(){ if(isLoggedIn) alert('Google Maps opens the exact pinned location.'); }
+let pendingLoginAction = null;
+function chatWithOwner(id){ id=Number(id); if(isLoggedIn) openChatModal(id); else { pendingLoginAction=()=>openChatModal(id); openModal(); } }
+function videoCallOwner(id){ id=Number(id); if(isLoggedIn) alert('வீடியோ அழைப்பு schedule செய்யப்பட்டது.'); else { pendingLoginAction=()=>alert('வீடியோ அழைப்பு schedule செய்யப்பட்டது.'); openModal(); } }
+function sendRequestOwner(id){ id=Number(id); if(isLoggedIn) alert('Request sent to owner.'); else { pendingLoginAction=()=>alert('Request sent to owner.'); openModal(); } }
+function pincodeInputOwner(val){ autoFillFromPincode(val,'owner'); }
+function pincodeInputBuilder(val){ autoFillFromPincode(val,'builder'); }
+function pincodeInputCustomer(val){ autoFillFromPincode(val,'customer'); renderProperties(); }
+
+/* ================= LOGIN FLOW ================= */
+function onLoginBtnClick(){
+  if(isLoggedIn){
+    document.getElementById('profileDropdown').classList.toggle('open');
+  } else {
+    openModal();
+  }
+}
+function openModal(){
+  document.getElementById('loginModal').classList.add('open');
+  document.getElementById('loginStep1').style.display='block';
+  document.getElementById('loginStep2').style.display='none';
+  document.getElementById('loginStep3').style.display='none';
+}
+function closeModal(){ document.getElementById('loginModal').classList.remove('open'); }
+
+/* ================= DOCUMENT VIEWER (Admin manual check) ================= */
+const queueMap = {kyc:{data:kycQueue,idPrefix:'kyc-item'}, cust:{data:custKycQueue,idPrefix:'cust-item'}, prop:{data:propQueue,idPrefix:'prop-item'}, proj:{data:projQueue,idPrefix:'proj-item'}};
+let currentDocCtx = null;
+function openDocViewer(kind, idx){
+  idx = Number(idx);
+  const q = queueMap[kind];
+  const item = q.data[idx];
+  currentDocCtx = {kind, idx};
+  document.getElementById('docModalTitle').textContent = item.name;
+  document.getElementById('docThumbGrid').innerHTML = (item.docs||[]).map((d,i)=>`
+    <div class="doc-thumb-lg" data-act="selectDoc" data-arg="${i}" id="docthumb-${i}"><span class="ic">${d.icon}</span>${d.label}</div>
+  `).join('');
+  document.getElementById('docPreview').innerHTML = '📄<span>ஒரு document-ஐ தேர்வு செய்யவும்</span>';
+  const fields = item.fields||[];
+  document.getElementById('docFieldTable').innerHTML = fields.length ? `
+    <thead><tr><th>Field</th><th>Owner entered</th><th>AI detected (OCR)</th><th>Match</th></tr></thead>
+    <tbody>${fields.map(f=>`<tr><td>${f.label}</td><td>${f.entered}</td><td>${f.detected}</td><td class="${f.match?'ok':'bad'}">${f.match?'✓':'✗'}</td></tr>`).join('')}</tbody>
+  ` : '';
+  document.getElementById('docModal').classList.add('open');
+}
+function selectDoc(i){
+  i = Number(i);
+  document.querySelectorAll('.doc-thumb-lg').forEach(t=>t.classList.remove('sel'));
+  document.getElementById('docthumb-'+i).classList.add('sel');
+  const q = queueMap[currentDocCtx.kind];
+  const doc = q.data[currentDocCtx.idx].docs[i];
+  document.getElementById('docPreview').innerHTML = `${doc.icon}<span>${doc.label} — scanned copy preview (demo)</span>`;
+}
+function closeDocModal(){ document.getElementById('docModal').classList.remove('open'); currentDocCtx=null; }
+function markManuallyVerified(){
+  if(!currentDocCtx) return;
+  const q = queueMap[currentDocCtx.kind];
+  const tag = document.getElementById(q.idPrefix+'-'+currentDocCtx.idx+'-tag');
+  if(tag){ tag.style.display='block'; tag.textContent='✓ Admin manually verified documents'; }
+  closeDocModal();
+}
+
+/* ================= CHAT (Customer ↔ Owner) ================= */
+const chatHistory = {};
+let currentChatPropId = null;
+let currentAgreementPropId = null;
+function openChatModal(id){
+  id = Number(id);
+  const p = properties.find(x=>x.id===id);
+  if(!p) return;
+  currentChatPropId = id;
+  document.getElementById('chatModalTitle').textContent = 'Chat — '+p.owner;
+  document.getElementById('chatModalSub').textContent = p.title+' · '+p.area+', '+p.city;
+  if(!chatHistory[id]){
+    chatHistory[id] = [
+      {who:'them', text:'வணக்கம்! '+p.title+' பத்தி கேள்வி இருந்தா கேளுங்க.'},
+    ];
+  }
+  renderChatMessages();
+  document.getElementById('chatModal').classList.add('open');
+}
+function closeChatModal(){
+  document.getElementById('chatModal').classList.remove('open');
+  currentChatPropId = null;
+}
+function renderChatMessages(){
+  const msgs = chatHistory[currentChatPropId] || [];
+  document.getElementById('chatMessages').innerHTML = msgs.map(m=>`<div class="chat-bubble ${m.who}">${m.text}</div>`).join('');
+  const box = document.getElementById('chatMessages');
+  box.scrollTop = box.scrollHeight;
+}
+function sendChatMessage(){
+  if(!currentChatPropId) return;
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  chatHistory[currentChatPropId].push({who:'me', text});
+  input.value='';
+  renderChatMessages();
+  setTimeout(()=>{
+    chatHistory[currentChatPropId].push({who:'them', text:'நன்றி, உங்க கேள்விக்கு owner சீக்கிரம் பதில் தருவார்.'});
+    renderChatMessages();
+  }, 700);
+}
+
+/* ================= RENTAL AGREEMENT (Offline / Online) ================= */
+let agreementFee = 99;
+const agreementState = {}; // {propId: {type, ownerPaid, custPaid, offlineDone, tenantName, startDate, duration, deposit, notice, terms}}
+function getAgreementState(id){
+  if(!agreementState[id]) agreementState[id] = {type:'offline', ownerPaid:false, custPaid:false, offlineDone:false, tenantName:'', startDate:'', duration:'11', deposit:'', notice:'1', terms:''};
+  return agreementState[id];
+}
+function openAgreementModal(id){
+  id = Number(id);
+  if(!isLoggedIn){ pendingLoginAction=()=>openAgreementModal(id); openModal(); return; }
+  const p = properties.find(x=>x.id===id);
+  if(!p) return;
+  currentAgreementPropId = id;
+  document.getElementById('agreeModalTitle').textContent = 'Rental Agreement';
+  document.getElementById('agreeModalSub').textContent = p.title+' · '+p.owner+' ↔ நீங்கள்';
+  const st = getAgreementState(id);
+  document.getElementById('agree-tenant-name').value = st.tenantName;
+  document.getElementById('agree-owner-name').value = p.owner;
+  document.getElementById('agree-start-date').value = st.startDate;
+  document.getElementById('agree-duration').value = st.duration;
+  document.getElementById('agree-rent').value = fmtPrice(p.price, false);
+  document.getElementById('agree-deposit').value = st.deposit || (p.price*3);
+  document.getElementById('agree-notice').value = st.notice;
+  document.getElementById('agree-terms').value = st.terms;
+  document.querySelectorAll('#agreeTypeToggle button').forEach(b=>b.classList.toggle('on', b.dataset.arg===st.type));
+  document.getElementById('agreeOfflinePanel').style.display = st.type==='offline' ? 'block' : 'none';
+  document.getElementById('agreeOnlinePanel').style.display = st.type==='online' ? 'block' : 'none';
+  document.getElementById('agreeFeeAmount').innerHTML = '₹'+agreementFee+' <span style="font-size:11px;color:var(--muted);font-weight:400">per person</span>';
+  renderAgreementPayRows();
+  document.getElementById('agreeOfflineStatus').textContent = st.offlineDone ? '✓ Offline-ல் agreement உருவாக்கப்பட்டது — கட்டணம் எதுவும் இல்லை' : '';
+  if(st.offlineDone || (st.custPaid && st.ownerPaid)) generateAgreementDoc(); else { document.getElementById('agreeDocWrap').innerHTML=''; document.getElementById('agreeSuccessBox').style.display='none'; }
+  document.getElementById('agreementModal').classList.add('open');
+}
+function closeAgreementModal(){ document.getElementById('agreementModal').classList.remove('open'); currentAgreementPropId=null; }
+function setAgreementType(type){
+  if(!currentAgreementPropId) return;
+  const st = getAgreementState(currentAgreementPropId);
+  st.type = type;
+  document.querySelectorAll('#agreeTypeToggle button').forEach(b=>b.classList.toggle('on', b.dataset.arg===type));
+  document.getElementById('agreeOfflinePanel').style.display = type==='offline' ? 'block' : 'none';
+  document.getElementById('agreeOnlinePanel').style.display = type==='online' ? 'block' : 'none';
+}
+function saveAgreementFormFields(){
+  if(!currentAgreementPropId) return null;
+  const st = getAgreementState(currentAgreementPropId);
+  st.tenantName = document.getElementById('agree-tenant-name').value.trim();
+  st.startDate = document.getElementById('agree-start-date').value;
+  st.duration = document.getElementById('agree-duration').value;
+  st.deposit = document.getElementById('agree-deposit').value;
+  st.notice = document.getElementById('agree-notice').value;
+  st.terms = document.getElementById('agree-terms').value.trim();
+  return st;
+}
+function markOfflineAgreementDone(){
+  if(!currentAgreementPropId) return;
+  const st = saveAgreementFormFields();
+  if(!st.tenantName || !st.startDate){ alert('Tenant பெயர் மற்றும் தொடங்கும் தேதியை உள்ளிடவும்.'); return; }
+  st.offlineDone = true;
+  document.getElementById('agreeOfflineStatus').textContent = '✓ Offline-ல் agreement உருவாக்கப்பட்டது — கட்டணம் எதுவும் இல்லை';
+  generateAgreementDoc();
+}
+function renderAgreementPayRows(){
+  if(!currentAgreementPropId) return;
+  const st = getAgreementState(currentAgreementPropId);
+  document.getElementById('agreeCustPayWrap').innerHTML = st.custPaid
+    ? '<span class="status-paid">✓ Paid</span>'
+    : '<button data-act="payAgreementCustomer">Pay ₹'+agreementFee+'</button>';
+  document.getElementById('agreeOwnerPayWrap').innerHTML = st.ownerPaid
+    ? '<span class="status-paid">✓ Paid</span>'
+    : '<span class="status-pending">Pending</span> <button data-act="payAgreementOwner" style="margin-left:6px">Simulate Owner Pay</button>';
+  checkAgreementComplete();
+}
+function payAgreementCustomer(){
+  if(!currentAgreementPropId) return;
+  const st = saveAgreementFormFields();
+  if(!st.tenantName || !st.startDate){ alert('Payment செய்யும் முன் Tenant பெயர் மற்றும் தொடங்கும் தேதியை உள்ளிடவும்.'); return; }
+  st.custPaid = true;
+  renderAgreementPayRows();
+}
+function payAgreementOwner(){
+  if(!currentAgreementPropId) return;
+  getAgreementState(currentAgreementPropId).ownerPaid = true;
+  renderAgreementPayRows();
+}
+function checkAgreementComplete(){
+  const st = getAgreementState(currentAgreementPropId);
+  const box = document.getElementById('agreeSuccessBox');
+  if(st.custPaid && st.ownerPaid){
+    const receiptNo = 'RB-AGR-'+(1000+currentAgreementPropId*7);
+    box.style.display = 'block';
+    box.innerHTML = `<div class="agree-success">
+      <div class="title">✓ Agreement உருவாக்கப்பட்டது!</div>
+      <div class="line">Receipt No: ${receiptNo}</div>
+      <div class="line">Agreement Document &amp; Receipt இருவரின் Phone (SMS) &amp; Email-க்கும் அனுப்பப்பட்டது.</div>
+    </div>`;
+    generateAgreementDoc();
+  } else {
+    box.style.display = 'none';
+    box.innerHTML = '';
+    document.getElementById('agreeDocWrap').innerHTML='';
+  }
+}
+function generateAgreementDoc(){
+  const id = currentAgreementPropId;
+  const p = properties.find(x=>x.id===id);
+  const st = getAgreementState(id);
+  if(!p || !st) return;
+  const startStr = st.startDate ? new Date(st.startDate).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—';
+  document.getElementById('agreeDocWrap').innerHTML = `
+    <h4 style="margin:16px 0 8px;font-size:13px">3. உருவாக்கப்பட்ட ஒப்பந்தம் / Generated Agreement</h4>
+    <div class="agree-doc">
+      <h4>RENTAL AGREEMENT — RentalBHK</h4>
+      <div class="row"><span>Property</span><b>${p.title}, ${p.area}, ${p.city}</b></div>
+      <div class="row"><span>Owner</span><b>${p.owner}</b></div>
+      <div class="row"><span>Tenant</span><b>${st.tenantName || '—'}</b></div>
+      <div class="row"><span>Monthly Rent</span><b>${fmtPrice(p.price,false)}</b></div>
+      <div class="row"><span>Security Deposit</span><b>₹${(+st.deposit||0).toLocaleString('en-IN')}</b></div>
+      <div class="row"><span>Agreement Start Date</span><b>${startStr}</b></div>
+      <div class="row"><span>Duration</span><b>${st.duration||'—'} மாதங்கள்</b></div>
+      <div class="row"><span>Notice Period</span><b>${st.notice||'—'} மாதம்</b></div>
+      <div class="row"><span>Mode</span><b>${st.type==='online'?'Online (Paid)':'Offline'}</b></div>
+      ${st.terms ? `<div class="clause"><b>கூடுதல் நிபந்தனைகள்:</b> ${st.terms}</div>` : ''}
+      <div class="clause">இந்த ஆவணம் RentalBHK மூலம் உருவாக்கப்பட்டது. இருதரப்பினரும் மேற்கண்ட நிபந்தனைகளுக்கு உடன்பட்டதாக கருதப்படும்.</div>
+      <div class="sig-row">
+        <div><div class="sig-line">Owner Signature</div></div>
+        <div><div class="sig-line">Tenant Signature</div></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <button class="btn-primary" style="flex:1" data-act="doAlert" data-arg="Agreement PDF download ஆகும் (demo).">⬇️ Download PDF</button>
+      <button class="btn-ghost" style="flex:1" data-act="doAlert" data-arg="Print dialog open ஆகும் (demo).">🖨️ Print</button>
+    </div>
+  `;
+}
+
+function sendOtp(){
+  document.getElementById('loginStep1').style.display='none';
+  document.getElementById('loginStep2').style.display='block';
+}
+function verifyOtp(){
+  document.getElementById('loginStep2').style.display='none';
+  document.getElementById('loginStep3').style.display='block';
+}
+document.getElementById('rolePick').addEventListener('click', e=>{
+  const rp = e.target.closest('.rp'); if(!rp) return;
+  document.querySelectorAll('.rp').forEach(x=>x.classList.remove('on'));
+  rp.classList.add('on');
+});
+function finishLogin(){
+  isLoggedIn = true;
+  const role = document.querySelector('.rp.on').dataset.r;
+  closeModal();
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'பிரியா S ▾';
+  btn.classList.add('is-in');
+  switchToRole(role);
+  renderAll();
+  refreshOpenDetail();
+  if(pendingLoginAction){ const fn = pendingLoginAction; pendingLoginAction = null; fn(); }
+}
+function doLogout(){
+  isLoggedIn = false;
+  interestConfirmedIds.clear();
+  document.getElementById('profileDropdown').classList.remove('open');
+  const btn = document.getElementById('loginBtn');
+  btn.textContent = 'உள்நுழைய / Login';
+  btn.classList.remove('is-in');
+  switchToRole('customer');
+  renderAll();
+  refreshOpenDetail();
+}
+function quickSwitch(role){
+  if(!isLoggedIn){ openModal(); return; }
+  document.getElementById('profileDropdown').classList.remove('open');
+  switchToRole(role);
+}
+function goToSettings(){
+  document.getElementById('profileDropdown').classList.remove('open');
+  if(!isLoggedIn){ openModal(); return; }
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-settings').classList.add('active');
+  document.querySelectorAll('#roleSwitch button').forEach(b=>b.classList.remove('active'));
+}
+function switchToRole(role){
+  document.querySelectorAll('#roleSwitch button').forEach(b=>b.classList.toggle('active', b.dataset.role===role));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+role).classList.add('active');
+}
+
+/* ================= ROLE SWITCH TABS ================= */
+document.getElementById('roleSwitch').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  switchToRole(btn.dataset.role);
+});
+
+/* ================= CUSTOMER FILTERS ================= */
+document.querySelectorAll('#f-bhk .chip, #f-pref .chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{ chip.classList.toggle('on'); renderProperties(); });
+});
+document.getElementById('f-cat').addEventListener('click', e=>{
+  const chip = e.target.closest('.cat-chip'); if(!chip) return;
+  chip.classList.toggle('on');
+  const onlyHouse = !document.querySelectorAll('#f-cat .cat-chip.on').length || document.querySelector('#f-cat .cat-chip[data-val="house"].on');
+  document.getElementById('bhkGroup').style.display = onlyHouse ? 'block' : 'none';
+  renderProperties();
+});
+document.getElementById('f-listtype').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('#f-listtype button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const slider = document.getElementById('f-budget');
+  if(btn.dataset.val==='sale'){ slider.min=500000; slider.max=15000000; slider.step=100000; slider.value=8000000; }
+  else { slider.min=5000; slider.max=60000; slider.step=1000; slider.value=40000; }
+  onBudgetInput();
+});
+function onBudgetInput(){
+  const v = +document.getElementById('f-budget').value;
+  const isSale = document.querySelector('#f-listtype button.on').dataset.val==='sale';
+  document.getElementById('budgetVal').textContent = fmtPrice(v, isSale);
+  renderProperties();
+}
+function activeVals(id){ return [...document.querySelectorAll('#'+id+' .chip.on, #'+id+' .cat-chip.on')].map(c=>c.dataset.val); }
+
+function renderAdBanner(){
+  const el = document.getElementById('adBanner');
+  if(!el) return;
+  el.innerHTML = localAds.map(ad=>`<div class="ad-chip" data-act="doAlert" data-arg="${ad.name} — ${ad.phone} க்கு அழைக்கவும் (demo).">${ad.icon} ${ad.category}</div>`).join('');
+}
+function renderProperties(){
+  const city = document.getElementById('f-city').value;
+  const pincode = document.getElementById('f-pincode').value.trim();
+  const areaType = document.getElementById('f-areatype').value;
+  const listType = document.querySelector('#f-listtype button.on').dataset.val;
+  const budget = +document.getElementById('f-budget').value;
+  const bhks = activeVals('f-bhk');
+  const cats = activeVals('f-cat');
+  const prefs = activeVals('f-pref');
+  const q = document.getElementById('searchBox').value.trim().toLowerCase();
+
+  let list = properties.filter(p=>{
+    if(p.listingType!==listType) return false;
+    if(city && p.city!==city) return false;
+    if(pincode && !p.pincode.startsWith(pincode)) return false;
+    if(areaType && p.areaType!==areaType) return false;
+    if(p.price>budget) return false;
+    if(cats.length && !cats.includes(p.category)) return false;
+    if(bhks.length && !bhks.includes(String(p.bhk))) return false;
+    if(prefs.includes('parking') && !p.parking) return false;
+    if(prefs.includes('family') && p.pref!=='family') return false;
+    if(prefs.includes('bachelor') && p.pref!=='bachelor') return false;
+    if(prefs.includes('pet') && p.pref!=='pet') return false;
+    if(q && !(p.title.toLowerCase().includes(q)||p.area.toLowerCase().includes(q)||p.city.toLowerCase().includes(q)||p.pincode.includes(q))) return false;
+    return true;
+  });
+
+  document.getElementById('resultCount').textContent = list.length+' Propert'+(list.length===1?'y':'ies')+' found';
+  const grid = document.getElementById('propGrid');
+  if(!list.length){ grid.innerHTML='<div class="empty">No properties match these filters yet — try widening your budget or clearing a filter.</div>'; return; }
+
+  const gradients = ['135deg,#FFD6A5,#FFB37B','135deg,#B8E0FF,#7FB8FF','135deg,#C9F2D8,#8FDCB0','135deg,#E4D4FF,#C3A8FF','135deg,#FFD1DC,#FFA6BE','135deg,#D4E8FF,#A9C9FF'];
+
+  grid.innerHTML = list.map((p,i)=>{
+    const propCard = `
+    <div class="prop-card" data-act="openDetail" data-arg="${p.id}">
+      <div class="prop-img" style="background:linear-gradient(${gradients[i%gradients.length]})">
+        ${p.verified?'<div class="verified">✓ Verified</div>':''}
+        <div class="heart" data-act="stopProp">♡</div>
+        <div class="badge">${p.bhk?p.bhk+' BHK':catLabels[p.category]}</div>
+      </div>
+      <div class="prop-body">
+        <div class="prop-rent ${isLoggedIn?'':'blur-locked'}">${fmtPrice(p.price, p.listingType==='sale')}<span>${p.listingType==='sale'?' total':' /month'}</span></div>
+        <div class="prop-loc">${areaLabels[p.areaType]} · ${p.city} · PIN ${p.pincode}</div>
+        <div class="prop-tags">
+          <span class="tag">${p.listingType==='rent'?'For Rent':'For Sale'}</span>
+          ${p.parking?'<span class="tag">Parking</span>':''}
+          <span class="tag">★ ${p.rating}</span>
+        </div>
+      </div>
+    </div>`;
+    // Insert a sponsored local-service ad after every 4th property card
+    if((i+1)%4===0){
+      const ad = localAds[Math.floor(i/4) % localAds.length];
+      return propCard + `
+      <div class="ad-card" data-act="doAlert" data-arg="${ad.name} — ${ad.phone} க்கு அழைக்கவும் (demo).">
+        <div class="ad-ribbon">Sponsored</div>
+        <div class="ad-icon">${ad.icon}</div>
+        <div class="ad-body">
+          <div class="ad-cat">${ad.category}</div>
+          <div class="ad-name">${ad.name}</div>
+          <div class="ad-tag">${ad.tag}</div>
+          <button>📞 ${ad.phone}</button>
+        </div>
+      </div>`;
+    }
+    return propCard;
+  }).join('');
+}
+
+const interestConfirmedIds = new Set();
+let currentDetailPropId = null;
+function openDetail(id){
+  id = Number(id);
+  currentDetailPropId = id;
+  const p = properties.find(x=>x.id===id);
+  const panel = document.getElementById('detailPanel');
+  const priceFull = fmtPrice(p.price, false);
+  const interested = interestConfirmedIds.has(id);
+  const contactBlock = `
+      <div class="amen">Owner: ${p.owner}</div>
+      <div class="amen">Phone: ${p.phone}</div>
+      <div class="amen">${p.bhk?p.bhk+' BHK · ':''}${p.parking?'Parking':'No parking'}</div>
+  `;
+  const lockedClass = isLoggedIn?'':'blur-locked';
+  panel.innerHTML = `
+    <div class="detail-top">
+      <div>
+        <h2 style="margin:0 0 4px">${p.title}</h2>
+        <div class="prop-loc">${catLabels[p.category]} · ${areaLabels[p.areaType]} · ${p.area}, ${p.city} · PIN ${p.pincode} ${p.verified?'· <span style="color:var(--green);font-weight:600">✓ Verified</span>':'· <span style="color:var(--amber);font-weight:600">Verification pending</span>'}</div>
+      </div>
+      <button class="close-detail" data-act="closeDetailPanel">Close</button>
+    </div>
+
+    <div class="prop-rent ${lockedClass}" style="font-size:24px;margin-top:12px">${priceFull}<span style="font-size:13px">${p.listingType==='sale'?' total':' /month'}</span></div>
+
+    <h3 style="margin:18px 0 8px">Photos &amp; Video</h3>
+    <div class="${lockedClass}">
+      <div class="photo-grid">
+        <div class="photo-tile" style="background:linear-gradient(135deg,#FFD6A5,#FFB37B)">📷</div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#B8E0FF,#7FB8FF)">📷</div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#C9F2D8,#8FDCB0)">📷</div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#E4D4FF,#C3A8FF)">📷</div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#FFD1DC,#FFA6BE)">📷</div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#D4E8FF,#A9C9FF)">🔄 360°</div>
+      </div>
+      <div class="video-tile" data-act="doAlert" data-arg="Short walkthrough video plays here (demo)."><div class="play">▶️</div><span>Short walkthrough video · 0:45</span></div>
+    </div>
+
+    <h3 style="margin:18px 0 8px">முகவரி &amp; Location</h3>
+    <div class="amen-grid ${lockedClass}">
+      <div class="amen">${p.address}</div>
+      <div class="amen">PIN: ${p.pincode}</div>
+      <div class="amen" style="cursor:pointer;color:var(--blue-dark);font-weight:600" data-act="mapsClickHandler">📍 Google Maps-ல் பார்க்க ↗</div>
+    </div>
+
+    <div class="amen-grid" style="margin-top:12px">
+      ${p.bhk?`<div class="amen">${p.bhk} BHK</div>`:''}
+      ${p.sqft?`<div class="amen">${p.sqft.toLocaleString('en-IN')} sq.ft</div>`:''}
+      <div class="amen">${p.parking?'Parking available':'No parking'}</div>
+      <div class="amen">${p.listingType==='rent'?'For Rent':'For Sale'}</div>
+    </div>
+
+    <h3 style="margin:20px 0 8px">Owner &amp; முழு விவரங்கள்</h3>
+    <div class="amen-grid ${lockedClass}">${contactBlock}</div>
+
+    ${!isLoggedIn ? `
+      <div class="add-form" style="margin-top:16px;text-align:center;padding:16px">
+        <div style="font-size:13px;margin-bottom:10px">Rent, Photos, Video, Location &amp; Owner விவரங்களை பார்க்க ஒரே ஒரு முறை Login பண்ணுங்க</div>
+        <button class="btn-primary" data-act="openModal">Login now</button>
+      </div>
+    ` : ''}
+
+    <div class="detail-actions">
+      <button class="btn-primary" data-act="chatWithOwner" data-arg="${id}">Chat with Owner</button>
+      <button class="btn-ghost" data-act="videoCallOwner" data-arg="${id}">📹 Video Call Owner</button>
+      <button class="btn-ghost" data-act="doAlert" data-arg="Added to comparison.">Compare</button>
+      <button class="btn-ghost" data-act="sendRequestOwner" data-arg="${id}">Send Request</button>
+      <button class="btn-ghost" data-act="openAgreementModal" data-arg="${id}">📝 Rental Agreement</button>
+    </div>
+    <h3 style="margin:20px 0 0">Reviews (${p.reviews})</h3>
+    <div class="review-row"><span>"Genuinely verified listing, owner was responsive."</span><span class="stars">★★★★★</span></div>
+    <div class="review-row"><span>"Good area, documents were all in order."</span><span class="stars">★★★★☆</span></div>
+  `;
+  panel.classList.add('open');
+  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+function refreshOpenDetail(){
+  const panel = document.getElementById('detailPanel');
+  if(currentDetailPropId && panel && panel.classList.contains('open')) openDetail(currentDetailPropId);
+}
+
+/* ================= LIVE LOCATION ================= */
+function confirmInterest(id){
+  id = Number(id);
+  interestConfirmedIds.add(id);
+  openDetail(id);
+}
+function handleDetailAction(id){
+  id = Number(id);
+  if(!isLoggedIn){ openModal(); return; }
+  confirmInterest(id);
+}
+
+function captureLiveLocation(targetId){
+  const id = targetId || 'locStatus';
+  const el = document.getElementById(id);
+  el.textContent = 'இடம் capture ஆகிறது…';
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos=>{ el.textContent = '✓ Captured: '+pos.coords.latitude.toFixed(4)+'°, '+pos.coords.longitude.toFixed(4)+'°'; el.style.color='var(--green)'; },
+      ()=>{ el.textContent = '✓ Captured (demo): 13.0827° N, 80.2707° E'; el.style.color='var(--green)'; }
+    );
+  } else {
+    el.textContent = '✓ Captured (demo): 13.0827° N, 80.2707° E';
+    el.style.color='var(--green)';
+  }
+}
+
+/* ================= OWNER ================= */
+function onCategoryChange(){
+  const cat = document.getElementById('np-category').value;
+  document.getElementById('np-bhk-wrap').style.display = (cat==='house'||cat==='flat') ? 'block' : 'none';
+  updateOwnerFee();
+}
+let ownerPaymentDone = false;
+function runAiVerification(){
+  if(!ownerPaymentDone){ alert('முதலில் Registration Fee-ஐ செலுத்தி "Payment செய்தேன்" பட்டனை சமர்ப்பிக்கவும்.'); document.getElementById('ownerPayBox').scrollIntoView({behavior:'smooth', block:'center'}); return; }
+  document.getElementById('aiVerifyStepper').style.display='block';
+  document.getElementById('aiVerifyStepper').scrollIntoView({behavior:'smooth', block:'center'});
+}
+const stageLabels = {ai:'AI Verified · Admin Review',admin:'Admin Reviewing',super:'Super Admin Approval',live:'Live',rejected:'Rejected'};
+function renderOwnerRows(){
+  document.getElementById('ownerRows').innerHTML = ownerProps.map(p=>`
+    <tr>
+      <td>${p.title}</td><td>${p.type}</td>
+      <td>${fmtPrice(p.price, p.unit==='sale')}</td>
+      <td><span class="stage-pill stage-${p.stage}">${stageLabels[p.stage]}</span></td>
+      <td class="row-actions">
+        <button data-act="doAlert" data-arg="Opens edit form.">Edit</button>
+        <button data-act="doAlert" data-arg="Marked as closed.">Mark Closed</button>
+        <button class="danger" data-act="doAlert" data-arg="Removed after confirmation.">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ================= BUILDER ================= */
+function renderBuilderRows(){
+  const el = document.getElementById('builderRows');
+  if(!el) return;
+  el.innerHTML = builderProps.map(p=>`
+    <tr>
+      <td>${p.title}</td><td>${p.units}</td><td>${p.price}</td>
+      <td><span class="stage-pill stage-${p.stage}">${stageLabels[p.stage]}</span></td>
+      <td class="row-actions">
+        <button data-act="doAlert" data-arg="Opens edit form.">Edit</button>
+        <button class="danger" data-act="doAlert" data-arg="Removed after confirmation.">Delete</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ================= ADMIN ================= */
+function confirmQueuePayment(kind, idx){
+  idx = Number(idx);
+  const arr = kind==='prop' ? propQueue : projQueue;
+  const item = arr[idx];
+  if(!item || !item.payment) return;
+  item.payment.status = 'paid';
+  renderAdmin();
+}
+function paymentBadgeHtml(payment){
+  if(!payment) return '';
+  if(payment.status==='paid'){
+    return `<div class="ai-badge" style="margin-top:5px;background:#E4F7EE;color:var(--green)">💳 Payment: ₹${payment.amount} · UTR ${payment.utr} · Submitted ✓</div>`;
+  }
+  if(payment.status==='pending'){
+    return `<div class="ai-badge" style="margin-top:5px;background:#FFF3DE;color:var(--amber)">💳 Payment: ₹${payment.amount} · UTR ${payment.utr} · Admin confirmation pending</div>`;
+  }
+  return `<div class="ai-badge" style="margin-top:5px;background:#FCE9E9;color:var(--red)">💳 Payment: ₹${payment.amount} · Not submitted yet</div>`;
+}
+function renderAdminPaymentSummary(){
+  const all = [...propQueue, ...projQueue].map(k=>k.payment).filter(Boolean);
+  const paid = all.filter(p=>p.status==='paid').length;
+  const pending = all.filter(p=>p.status==='pending').length;
+  const notSubmitted = all.filter(p=>p.status==='not_submitted').length;
+  const totalCollected = all.filter(p=>p.status==='paid').reduce((s,p)=>s+p.amount,0);
+  const el = document.getElementById('adminPaymentSummary');
+  if(!el) return;
+  el.innerHTML = `
+    <div class="stat-card"><div class="num" style="color:var(--green)">${paid}</div><div class="lbl">Payments submitted ✓</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--amber)">${pending}</div><div class="lbl">Confirmation pending</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--red)">${notSubmitted}</div><div class="lbl">Not submitted yet</div></div>
+    <div class="stat-card"><div class="num">₹${totalCollected.toLocaleString('en-IN')}</div><div class="lbl">Total collected</div></div>
+  `;
+}
+function renderAdmin(){
+  renderAdminPaymentSummary();
+  document.getElementById('pane-kyc').innerHTML = kycQueue.map((k,idx)=>`
+    <div class="verify-item" id="kyc-item-${idx}"><div class="verify-left"><div class="doc-thumb">🪪</div>
+      <div><div class="verify-name">${k.name}</div><div class="verify-sub">${k.sub} · ${k.time}</div>
+      <div class="ai-badge" style="margin-top:5px">🤖 AI verified ${k.ai}%${k.ai<80?' — manual review needed':' — Admin manual check செய்யவும்'}</div>
+      <div class="manual-tag" id="kyc-item-${idx}-tag"></div></div></div>
+      <div class="verify-actions">
+        <button class="video-btn" data-act="openDocViewer" data-arg="kyc" data-arg2="${idx}">📄 ஆவணங்களை பார்க்க</button>
+        <button class="video-btn" data-act="doAlert" data-arg="Owner-ஓடு video call schedule செய்யப்பட்டது.">📹 Video Call</button>
+        <button class="approve" data-act="finishVerifyItem" data-arg="Approved by Admin ✓">Approve</button>
+        <button class="reject" data-act="finishVerifyItem" data-arg="Rejected">Reject</button>
+      </div></div>
+  `).join('') || '<div class="empty">Queue is clear.</div>';
+
+  document.getElementById('pane-custkyc').innerHTML = custKycQueue.map((k,idx)=>`
+    <div class="verify-item" id="cust-item-${idx}"><div class="verify-left"><div class="doc-thumb">🧑</div>
+      <div><div class="verify-name">${k.name}</div><div class="verify-sub">${k.sub} · ${k.time}</div>
+      <div class="ai-badge" style="margin-top:5px">🤖 AI verified ${k.ai}%${k.ai<80?' — manual review needed':' — Admin manual check செய்யவும்'}</div>
+      <div class="manual-tag" id="cust-item-${idx}-tag"></div></div></div>
+      <div class="verify-actions">
+        <button class="video-btn" data-act="openDocViewer" data-arg="cust" data-arg2="${idx}">📄 ஆவணங்களை பார்க்க</button>
+        <button class="video-btn" data-act="doAlert" data-arg="Customer-ஓடு video call schedule செய்யப்பட்டது.">📹 Video Call</button>
+        <button class="approve" data-act="finishVerifyItem" data-arg="Approved by Admin ✓">Approve</button>
+        <button class="reject" data-act="finishVerifyItem" data-arg="Rejected">Reject</button>
+      </div></div>
+  `).join('') || '<div class="empty">Queue is clear.</div>';
+
+  document.getElementById('pane-prop').innerHTML = propQueue.map((k,idx)=>`
+    <div class="verify-item" id="prop-item-${idx}"><div class="verify-left"><div class="doc-thumb">🏠</div>
+      <div><div class="verify-name">${k.name}</div><div class="verify-sub">${k.sub} · ${k.time}</div>
+      <div class="ai-badge" style="margin-top:5px">🤖 AI match ${k.ai}%${k.ai<80?' — needs closer review':' — Admin manual check செய்யவும்'}</div>
+      ${paymentBadgeHtml(k.payment)}
+      <div class="manual-tag" id="prop-item-${idx}-tag"></div></div></div>
+      <div class="verify-actions">
+        <button class="video-btn" data-act="openDocViewer" data-arg="prop" data-arg2="${idx}">📄 ஆவணங்களை பார்க்க</button>
+        <button class="video-btn" data-act="doAlert" data-arg="வீடியோ அழைப்பு schedule செய்யப்பட்டது.">📹 Video Call</button>
+        ${k.payment && k.payment.status==='pending' ? `<button class="video-btn" data-act="confirmQueuePayment" data-arg="prop" data-arg2="${idx}">💳 Confirm Payment</button>` : ''}
+        <button class="approve" data-act="finishVerifyItem" data-arg="Forwarded to Super Admin ✓">Approve</button>
+        <button class="reject" data-act="finishVerifyItem" data-arg="Rejected">Reject</button>
+      </div></div>
+  `).join('') || '<div class="empty">Queue is clear.</div>';
+
+  document.getElementById('pane-proj').innerHTML = projQueue.map((k,idx)=>`
+    <div class="verify-item" id="proj-item-${idx}"><div class="verify-left"><div class="doc-thumb">🏗️</div>
+      <div><div class="verify-name">${k.name}</div><div class="verify-sub">${k.sub} · ${k.time}</div>
+      <div class="ai-badge" style="margin-top:5px">🤖 AI match ${k.ai}%${k.ai<80?' — needs closer review':''}</div>
+      ${paymentBadgeHtml(k.payment)}
+      <div class="manual-tag" id="proj-item-${idx}-tag"></div></div></div>
+      <div class="verify-actions">
+        <button class="video-btn" data-act="openDocViewer" data-arg="proj" data-arg2="${idx}">📄 ஆவணங்களை பார்க்க</button>
+        <button class="video-btn" data-act="doAlert" data-arg="Site visit video call scheduled.">📹 Video Call</button>
+        ${k.payment && k.payment.status==='pending' ? `<button class="video-btn" data-act="confirmQueuePayment" data-arg="proj" data-arg2="${idx}">💳 Confirm Payment</button>` : ''}
+        <button class="approve" data-act="finishVerifyItem" data-arg="Forwarded to Super Admin ✓">Approve</button>
+        <button class="reject" data-act="finishVerifyItem" data-arg="Rejected">Reject</button>
+      </div></div>
+  `).join('') || '<div class="empty">Queue is clear.</div>';
+
+  document.getElementById('pane-complaints').innerHTML = complaints.map(c=>`<div class="complaint">${c.text}<div class="meta">${c.meta}</div></div>`).join('');
+  document.getElementById('pane-reports').innerHTML = `<div class="district-grid">${districtStats.map(d=>`<div class="district-card"><h4>${d.name}</h4><div class="num">${d.num}</div><div class="verify-sub">active listings</div></div>`).join('')}</div>`;
+}
+document.querySelector('.admin-tabs').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('.admin-tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.admin-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById(btn.dataset.pane).classList.add('active');
+});
+
+/* ================= SUPER ADMIN ================= */
+function renderSuper(){
+  document.getElementById('adminListWrap').innerHTML = adminList.map(a=>`
+    <div class="admin-list-item"><div><div class="name">${a.name}</div><div class="sub">${a.sub}</div></div>
+    <button class="remove" data-act="removeAdminListItem">Remove</button></div>
+  `).join('');
+  document.getElementById('flaggedWrap').innerHTML = flaggedAccounts.map(f=>`
+    <div class="flagged-item"><div><div class="name">${f.name}</div><div class="sub">${f.sub}</div></div>
+    <button class="block-btn" data-act="finishFlaggedItem" data-arg="Blocked">Block</button></div>
+  `).join('');
+  document.getElementById('finalApprovalWrap').innerHTML = finalApprovals.map(f=>`
+    <div class="verify-item"><div class="verify-left"><div class="doc-thumb">✅</div>
+      <div><div class="verify-name">${f.name}</div><div class="verify-sub">${f.sub} · ${f.time}</div></div></div>
+      <div class="verify-actions">
+        <button class="approve" data-act="finishVerifyItem" data-arg="Published live ✓">Publish Live</button>
+        <button class="reject" data-act="finishVerifyItem" data-arg="Sent back to Admin">Send Back</button>
+      </div></div>
+  `).join('') || '<div class="empty">Nothing pending.</div>';
+  renderAdsList();
+  renderReports();
+}
+
+/* ---- Advertisement Management ---- */
+function renderAdsList(){
+  const el = document.getElementById('adsListWrap');
+  if(!el) return;
+  el.innerHTML = localAds.map((ad,idx)=>`
+    <div class="admin-list-item">
+      <div><div class="name">${ad.icon} ${ad.name}</div><div class="sub">${ad.category} · ${ad.tag} · ${ad.phone}</div></div>
+      <button class="remove" data-act="removeAd" data-arg="${idx}">Remove</button>
+    </div>
+  `).join('') || '<div class="empty">Ads எதுவும் இல்லை.</div>';
+}
+const adIcons = {Painting:'🎨',Plumbing:'🔧',Cleaning:'🧹',Electric:'⚡',Electronics:'📺'};
+function addAd(){
+  const name = document.getElementById('ad-name').value.trim();
+  const category = document.getElementById('ad-category').value;
+  const tag = document.getElementById('ad-tag').value.trim() || 'Contact for service';
+  const phone = document.getElementById('ad-phone').value.trim();
+  if(!name || !phone){ alert('வணிக பெயர் &amp; Phone number உள்ளிடவும்.'.replace('&amp;','&')); return; }
+  localAds.push({icon:adIcons[category]||'🛠️', category, name, tag, phone});
+  document.getElementById('ad-name').value='';
+  document.getElementById('ad-tag').value='';
+  document.getElementById('ad-phone').value='';
+  renderAdsList();
+  renderAdBanner();
+  renderProperties();
+}
+function removeAd(idx){
+  idx = Number(idx);
+  localAds.splice(idx,1);
+  renderAdsList();
+  renderAdBanner();
+  renderProperties();
+}
+
+/* ---- Reports (Revenue & Properties, by Day/Week/Month/Year/Custom) ---- */
+function seededVal(seed, i, base, spread){
+  const x = Math.sin(seed*13.7 + i*7.3) * 10000;
+  const frac = x - Math.floor(x);
+  return Math.round(base + frac*spread);
+}
+function buildBuckets(period){
+  if(period==='day'){
+    const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    return days.map((d,i)=>({label:d, seed:i+1}));
+  }
+  if(period==='week'){
+    return ['W1','W2','W3','W4','W5','W6'].map((w,i)=>({label:w, seed:i+11}));
+  }
+  if(period==='month'){
+    return ['Apr','May','Jun','Jul','Aug','Sep'].map((m,i)=>({label:m, seed:i+21}));
+  }
+  if(period==='year'){
+    return ['2022','2023','2024','2025','2026'].map((y,i)=>({label:y, seed:i+31}));
+  }
+  // custom
+  const fromV = document.getElementById('rep-from').value;
+  const toV = document.getElementById('rep-to').value;
+  if(!fromV || !toV) return null;
+  const from = new Date(fromV), to = new Date(toV);
+  if(isNaN(from)||isNaN(to)||from>to) return null;
+  const dayMs = 86400000;
+  const totalDays = Math.max(1, Math.round((to-from)/dayMs));
+  const buckets = Math.min(10, Math.max(2, totalDays));
+  const out = [];
+  for(let i=0;i<buckets;i++){
+    const d = new Date(from.getTime() + Math.round(i*totalDays/(buckets-1||1))*dayMs);
+    out.push({label:(d.getMonth()+1)+'/'+d.getDate(), seed:i+41});
+  }
+  return out;
+}
+function renderReports(){
+  const metric = document.querySelector('#rep-metric button.on').dataset.val;
+  const period = document.querySelector('#rep-period .chip.on').dataset.val;
+  document.getElementById('rep-custom-range').style.display = period==='custom' ? 'grid' : 'none';
+  const buckets = buildBuckets(period);
+  const repBars = document.getElementById('repBars');
+  const repLabels = document.getElementById('repLabels');
+  const repStats = document.getElementById('repStats');
+  if(!buckets){
+    repBars.innerHTML=''; repLabels.innerHTML='';
+    repStats.innerHTML = '<div class="empty" style="grid-column:1/-1">Custom range-க்கு From &amp; To தேதிகளை தேர்வு செய்யவும்.</div>';
+    return;
+  }
+  const isRev = metric==='revenue';
+  const vals = buckets.map(b=> isRev ? seededVal(b.seed,1,40,90) : seededVal(b.seed,2,15,55));
+  const max = Math.max(...vals);
+  repBars.innerHTML = vals.map(v=>`<div class="rev-bar" style="height:${(v/max*100)}%"><span>${isRev?'₹'+v+'k':v}</span></div>`).join('');
+  repLabels.innerHTML = buckets.map(b=>`<div>${b.label}</div>`).join('');
+
+  const total = vals.reduce((a,b)=>a+b,0);
+  const avg = Math.round(total/vals.length);
+  const change = seededVal(buckets[0].seed,9,-12,30);
+  if(isRev){
+    repStats.innerHTML = `
+      <div class="stat-card"><div class="num">₹${total.toLocaleString('en-IN')}k</div><div class="lbl">Total revenue</div></div>
+      <div class="stat-card"><div class="num">₹${avg.toLocaleString('en-IN')}k</div><div class="lbl">Avg / period</div></div>
+      <div class="stat-card"><div class="num" style="color:${change>=0?'var(--green)':'var(--red)'}">${change>=0?'+':''}${change}%</div><div class="lbl">vs previous period</div></div>
+    `;
+  } else {
+    const cats = [
+      {l:'வீடு/பிளாட்',v:seededVal(buckets[0].seed,3,20,50)},
+      {l:'காலி இடம்',v:seededVal(buckets[0].seed,4,4,14)},
+      {l:'மைதானம்',v:seededVal(buckets[0].seed,5,1,6)},
+      {l:'மண்டபம்',v:seededVal(buckets[0].seed,6,1,5)},
+      {l:'கடை',v:seededVal(buckets[0].seed,7,3,10)},
+      {l:'Builder Projects',v:seededVal(buckets[0].seed,8,1,6)},
+    ];
+    repStats.innerHTML = `
+      <div class="stat-card"><div class="num">${total.toLocaleString('en-IN')}</div><div class="lbl">New listings</div></div>
+      <div class="stat-card"><div class="num">${avg.toLocaleString('en-IN')}</div><div class="lbl">Avg / period</div></div>
+      <div class="stat-card"><div class="num" style="color:${change>=0?'var(--green)':'var(--red)'}">${change>=0?'+':''}${change}%</div><div class="lbl">vs previous period</div></div>
+      ${cats.map(c=>`<div class="stat-card"><div class="num">${c.v}</div><div class="lbl">${c.l}</div></div>`).join('')}
+    `;
+  }
+}
+document.getElementById('rep-metric').addEventListener('click', e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('#rep-metric button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderReports();
+});
+document.getElementById('rep-period').addEventListener('click', e=>{
+  const chip = e.target.closest('.chip'); if(!chip) return;
+  document.querySelectorAll('#rep-period .chip').forEach(c=>c.classList.remove('on'));
+  chip.classList.add('on');
+  if(chip.dataset.val==='custom'){
+    const to = document.getElementById('rep-to');
+    const from = document.getElementById('rep-from');
+    if(!to.value){ const d=new Date(); to.value=d.toISOString().slice(0,10); }
+    if(!from.value){ const d=new Date(); d.setDate(d.getDate()-14); from.value=d.toISOString().slice(0,10); }
+  }
+  renderReports();
+});
+
+/* ---- Pricing & Offers: category × rural/urban fee schedule ---- */
+const feeCatLabels = {house:'House',flat:'Flat / Apartment',land:'Vacant Land',plot:'Plot',ground:'Ground',hall:'Venue / Mandapam',shop:'Shop'};
+const feeSchedule = {
+  house:{urban:150,rural:90},
+  flat:{urban:150,rural:90},
+  land:{urban:120,rural:70},
+  plot:{urban:120,rural:70},
+  ground:{urban:80,rural:50},
+  hall:{urban:300,rural:180},
+  shop:{urban:200,rural:120},
+};
+function renderFeeTable(){
+  document.getElementById('feeTableBody').innerHTML = Object.keys(feeCatLabels).map(cat=>`
+    <tr>
+      <td>${feeCatLabels[cat]}</td>
+      <td><input id="fee-urban-${cat}" value="${feeSchedule[cat].urban}" style="width:80px;padding:6px;border:1px solid var(--line);border-radius:6px;text-align:center"></td>
+      <td><input id="fee-rural-${cat}" value="${feeSchedule[cat].rural}" style="width:80px;padding:6px;border:1px solid var(--line);border-radius:6px;text-align:center"></td>
+    </tr>
+  `).join('');
+}
+function onRuralRatioInput(val){
+  const ratio = Math.max(0, Math.min(100, Number(val)||0));
+  Object.keys(feeCatLabels).forEach(cat=>{
+    const urbanEl = document.getElementById('fee-urban-'+cat);
+    const ruralEl = document.getElementById('fee-rural-'+cat);
+    if(urbanEl && ruralEl){ ruralEl.value = Math.round((+urbanEl.value||0) * ratio/100); }
+  });
+}
+function saveFeeTable(){
+  Object.keys(feeCatLabels).forEach(cat=>{
+    feeSchedule[cat].urban = Math.max(0, +document.getElementById('fee-urban-'+cat).value || 0);
+    feeSchedule[cat].rural = Math.max(0, +document.getElementById('fee-rural-'+cat).value || 0);
+  });
+  document.getElementById('feeTableNote').textContent = '✓ Fee schedule updated — Owner Add Property படிவத்தில் இப்போ இந்த rates காட்டும்';
+  updateOwnerFee();
+}
+function updateOwnerFee(){
+  const catEl = document.getElementById('np-category');
+  const areaEl = document.getElementById('np-areatype');
+  if(!catEl || !areaEl) return;
+  const cat = catEl.value;
+  const areaType = areaEl.value;
+  const isRural = (areaType==='village' || areaType==='town');
+  const rec = feeSchedule[cat] || {urban:0,rural:0};
+  const amount = isRural ? rec.rural : rec.urban;
+  const label = document.getElementById('ownerFeeCatLabel');
+  const amt = document.getElementById('ownerFeeAmount');
+  if(label) label.textContent = 'Category: '+feeCatLabels[cat]+' · Area: '+(areaType?areaLabels[areaType]:'—')+' ('+(isRural?'Rural':'Urban')+')';
+  if(amt) amt.textContent = '₹'+amount.toLocaleString('en-IN');
+}
+const paymentSettings = {upi:'rentalbhk@upi', accName:'RentalBHK Pvt Ltd', accNo:'123456789012', ifsc:'HDFC0001234', bank:'HDFC Bank, Anna Nagar'};
+function saveAgreementFee(){
+  agreementFee = Math.max(0, +document.getElementById('agreeFeeInput').value || 0);
+  document.getElementById('agreementFeeNote').textContent = '✓ Online Rental Agreement Fee ₹'+agreementFee+' per person-ஆ புதுப்பிக்கப்பட்டது';
+}
+function savePaymentSettings(){
+  paymentSettings.upi = document.getElementById('payUpi').value;
+  paymentSettings.accName = document.getElementById('payAccName').value;
+  paymentSettings.accNo = document.getElementById('payAccNo').value;
+  paymentSettings.ifsc = document.getElementById('payIfsc').value;
+  paymentSettings.bank = document.getElementById('payBank').value;
+  document.getElementById('paymentSettingsNote').textContent = '✓ Payment details புதுப்பிக்கப்பட்டது — Owner/Builder-க்கு இப்போ இந்த UPI/Bank விவரம் காட்டும்';
+  syncOwnerPayDisplay();
+}
+function syncOwnerPayDisplay(){
+  const upiEl = document.getElementById('ownerPayUpi');
+  const bankEl = document.getElementById('ownerPayBankDetails');
+  if(upiEl) upiEl.textContent = paymentSettings.upi;
+  if(bankEl) bankEl.textContent = paymentSettings.accName+' · '+paymentSettings.accNo+' · '+paymentSettings.ifsc;
+}
+function submitOwnerPayment(){
+  const utr = document.getElementById('np-utr').value.trim();
+  if(!utr){ alert('UTR / Transaction ID-ஐ உள்ளிடவும்.'); return; }
+  ownerPaymentDone = true;
+  const status = document.getElementById('ownerPayStatus');
+  status.textContent = '✓ Payment சமர்ப்பிக்கப்பட்டது (UTR: '+utr+') — Admin confirm பண்ணும் வரை pending';
+  status.style.color = 'var(--amber)';
+}
+function saveWelcomeOffer(){
+  const on = document.getElementById('welcomeToggle').classList.contains('on');
+  const months = document.getElementById('welcomeMonths').value || 0;
+  const disc = document.getElementById('welcomeDiscount').value || 0;
+  const note = document.getElementById('welcomeNote');
+  note.textContent = on
+    ? '✓ Active: புதிய owners முதல் '+months+' மாதங்களுக்கு '+disc+'% Registration Fee தள்ளுபடி பெறுவார்கள்'
+    : 'Welcome offer தற்போது Off';
+  note.style.color = on ? 'var(--green)' : 'var(--muted)';
+}
+function saveReferralOffer(){
+  const on = document.getElementById('referralToggle').classList.contains('on');
+  const reward = document.getElementById('referrerReward').value || 0;
+  const months = document.getElementById('referredMonths').value || 0;
+  const note = document.getElementById('referralNote');
+  note.textContent = on
+    ? '✓ Active: பரிந்துரைப்பவருக்கு ₹'+reward+' reward, புதிய owner-க்கு '+months+' மாத Registration Fee இலவசம்'
+    : 'Referral program தற்போது Off';
+  note.style.color = on ? 'var(--green)' : 'var(--muted)';
+}
+renderFeeTable(); updateOwnerFee(); syncOwnerPayDisplay(); saveWelcomeOffer(); saveReferralOffer();
+
+/* ================= FEEDBACK ================= */
+document.getElementById('starPick').addEventListener('click', e=>{
+  const s = e.target.closest('span'); if(!s) return;
+  selectedStars = +s.dataset.v;
+  document.querySelectorAll('#starPick span').forEach(x=>x.classList.toggle('on', +x.dataset.v<=selectedStars));
+});
+function submitFeedback(){
+  const text = document.getElementById('fbText').value.trim();
+  if(!text || !selectedStars){ alert('தயவுசெய்து star rating மற்றும் கருத்தை உள்ளிடவும்.'); return; }
+  feedbackList.unshift({stars:selectedStars, text, reply:null});
+  document.getElementById('fbText').value='';
+  selectedStars=0;
+  document.querySelectorAll('#starPick span').forEach(x=>x.classList.remove('on'));
+  renderFeedback();
+}
+function renderFeedback(){
+  document.getElementById('feedbackList').innerHTML = feedbackList.map(f=>`
+    <div class="fb-item">
+      <div class="stars">${'★'.repeat(f.stars)}${'☆'.repeat(5-f.stars)}</div>
+      <div class="fb-q" style="margin-top:4px">${f.text}</div>
+      ${f.reply?`<div class="fb-reply"><b>RentalBHK Team:</b> ${f.reply}</div>`:`<div class="fb-reply" style="color:var(--muted)">பதில் காத்திருக்கிறது…</div>`}
+    </div>
+  `).join('');
+}
+
+/* ================= INIT ================= */
+function renderAll(){
+  renderAdBanner();
+  renderProperties();
+  renderOwnerRows();
+  renderBuilderRows();
+  renderAdmin();
+  renderSuper();
+  renderFeedback();
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#profileMenu')) document.getElementById('profileDropdown').classList.remove('open');
+});
+onBudgetInput();
+renderAll();
+applyLanguage();
+</script>
+</body>
+</html>
